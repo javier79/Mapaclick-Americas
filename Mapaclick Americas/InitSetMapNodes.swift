@@ -382,6 +382,12 @@ class InitSetMapNodes{
         let position = CGPoint(x: 127.34, y: 380.5)
         let name = "United States"
         let spriteNode = createMapNode(from: bpUnitedStates, position: position, name: name)
+        // Replace texture physics body with rectangle covering continental US only (excludes Alaska/Hawaii)
+        // Offset from sprite center since Alaska shifts the full bounds north-west
+        let rectSize = CGSize(width: 85.0, height: 35.0)
+        let rectCenter = CGPoint(x: 38.0, y: -13.0)
+        spriteNode.physicsBody = SKPhysicsBody(rectangleOf: rectSize, center: rectCenter)
+        spriteNode.physicsBody?.isDynamic = false
         return spriteNode
     }
     
@@ -560,6 +566,12 @@ class InitSetMapNodes{
         let position = CGPoint(x: 204.66, y: 308.94)
         let name = "Jamaica"
         let spriteNode = createMapNode(from: bpJamaica, position: position, name: name, lineWidth: 0.5)
+        // Replace texture physics body with rectangle larger than the island for easier tap detection
+        // Taller than wide, centered on the island
+        let rectSize = CGSize(width: 8.0, height: 6.0)
+        let rectCenter = CGPoint(x: -0.5, y: 0.0)
+        spriteNode.physicsBody = SKPhysicsBody(rectangleOf: rectSize, center: rectCenter)
+        spriteNode.physicsBody?.isDynamic = false
         return spriteNode
     }
 
@@ -581,6 +593,12 @@ class InitSetMapNodes{
         let position = CGPoint(x: 230.76, y: 309.28)
         let name = "Puerto Rico"
         let spriteNode = createMapNode(from: bpPuertoRico, position: position, name: name, lineWidth: 0.5)
+        // Replace texture physics body with rectangle larger than the island for easier tap detection
+        // Taller than wide, offset slightly right to avoid overlapping Dominican Republic (2pt gap)
+        let rectSize = CGSize(width: 5.0, height: 8.0)
+        let rectCenter = CGPoint(x: 0.0, y: 0.0)
+        spriteNode.physicsBody = SKPhysicsBody(rectangleOf: rectSize, center: rectCenter)
+        spriteNode.physicsBody?.isDynamic = false
         return spriteNode
     }
 
