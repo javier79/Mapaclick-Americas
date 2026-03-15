@@ -162,35 +162,9 @@ class AlphabeticGameScene: SKScene{
                 debugPrint("iPad Air 11inch(M2 18.6), iPad Air 11inch(M3 18.6), iPad Pro 11inch(1st-4th gen 18.6), iPad Pro 11 inch(M4 18.6), iPad Air(3rd gen 18.6), iPad Air(4th-5th gen 18.6), iPad(7th-9th gen 18.6), Ipad 10th Gen(18.6), iPad A16(11 Gen 18.6), iPad Pro 10.5")
                 setScaleAndIndepRenderingPositioningForIpadsMediumScreenSizes()
             
-            case (750.0, 1334), (1080, 2340),(1125.0, 2436.0) ://PROPORTIONS LOOKS OK
-                debugPrint("iPhoneSE(second gen 18.5), iPhoneSE(third gen 18.5), 8, iPhone 12 mini(18.5), iPhone 13 mini(18.5), iPhone X, iPhone XS(18.5) ,iPhone 11 PRO(18.5)")
-                setScaleAndIndepRenderingPositioningForSmallScreenSizes()
-            
-            case (1242.0, 2208.0), (828.0, 1792.0),(1242.0, 2688.0) ://PROPORTIONS COULD BE BETTER(PROPORTION FIXED AS SEPT 10 2025)
-                debugPrint("iPhone 8plus, iPhone XR(18.5), iPhone 11(18.5), iPhoneXS Max(18.5), iPhone 11 ProMax(18.5)")
-                //setScaleAndIndepRenderingPositioningForMediumLargeScreenSizes()
-                setScaleAndIndepRenderingPositioningForMediumLargeScreenSizesTwo()
-            
-           case (1170.0, 2532.0), (1179.0, 2556.0)://Possible template to edit for iPhone 16 Pro PROPORTIONS COULD BE BETTER(PROPORTION FIXED AS SEPT 12 2025)
-                debugPrint("iPhone 12(18.5), iPhone 12Pro(18.5), iPhone 13(18.5), iPhone 13 Pro(18.5), iPhone 14(18.5), iPhone 14 Pro(18.5), iPhone 15(18.6), iPhone 15 Pro(18.6), iPhone 16(18.6), iPhone 16e(18.6)")
-                //setScaleAndIndepRenderingPositioningForLargeScreenSizes()
-                setScaleAndIndepRenderingPositioningForLargeScreenSizesTwo()
-            
-           case (1284.0, 2778.0), (1290.0, 2796.0)://Possible template to edit for iPhone 16 Pro Max(PROPORTION FIXED AS SEPT 13 2025)
-                debugPrint("iPhone 12ProMax(18.5), iPhone 13 Pro Max(18.5), iPhone 14 plus(18.5), iPhone 14 ProMax(18.5), iPhone 15 plus(18.6), iPhone 15 ProMax(18.6), iPhone 16 Plus(18.6)")
-                setScaleAndIndepRenderingPositioningForXtraLargeScreenSizes()
-            
-           case (1206.0, 2622.0)/*, (1320.0, 2868.0)*/:
-            debugPrint("iPhone 16 Pro(18.6), iPhone 17, iPhone 17 Pro")
-            setScaleAndIndepRenderingPositioningForiPhone16Pro()
-            
-            case  (1320.0, 2868.0):
-            debugPrint("iPhone 16 ProMAX(18.6), iPhone 17 ProMax")
-            setScaleAndIndepRenderingPositioningForiPhone16ProMax()
-        
             default:
-               setScaleAndIndepRenderingPositioningForSmallScreenSizes()//This line will catch any device which screen measure is none of the above
-                break
+                debugPrint("All iPhones — universal rendering via fixed scene size (375x667)")
+                setScaleAndIndepRenderingPositioningForSmallScreenSizes()
         }
 
         // Override map positioning for the new Americas portrait map
@@ -198,7 +172,7 @@ class AlphabeticGameScene: SKScene{
 
         // Remove texture so .size controls dimensions directly
         mapRectangleBackground.texture = nil
-        mapRectangleBackground.color = UIColor.yellow//UIColor.init(red: 0.2588, green: 0.7608, blue: 1.0, alpha: 1.0)
+        mapRectangleBackground.color = UIColor.init(red: 0.2588, green: 0.7608, blue: 1.0, alpha: 1.0)
         mapRectangleBackground.colorBlendFactor = 1.0
         mapRectangleBackground.xScale = 1.0
         mapRectangleBackground.yScale = 1.0
@@ -250,9 +224,9 @@ class AlphabeticGameScene: SKScene{
                 //TutorialManager.resetTutorialCount()
                 //debugPrint("Tutorial count reset for testing")
         
-        if TutorialManager.shouldShowTutorial() {
-                    showTutorial()
-                }
+        // if TutorialManager.shouldShowTutorial() {
+        //             showTutorial()
+        //         }
         // //Ads Logic
         // if !TutorialManager.shouldShowTutorial() {
         //     showAdIfNeeded()
@@ -483,10 +457,10 @@ class AlphabeticGameScene: SKScene{
         // Control panel children positioning for portrait (small screens)
         // Layout: [Exit] [Country Name] [Skip]
         exitRedButton.setScale(1.30)
-        exitRedButton.position = CGPoint(x: -145, y: 0.5)
+        exitRedButton.position = CGPoint(x: -130, y: 0.5)
 
         skipButton.setScale(1.30)
-        skipButton.position = CGPoint(x: 145, y: 0.5)
+        skipButton.position = CGPoint(x: 130, y: 0.5)
 
         countriesNameBackground.setScale(1.10)
         countriesNameBackground.position = CGPoint(x: 0, y: 0.5)
@@ -494,7 +468,7 @@ class AlphabeticGameScene: SKScene{
         // Move labelScores to far right at same height as timer (reparent from controlPanel to self)
         //labelScores.removeFromParent()
         labelScores.fontSize = 14
-        labelScores.position = CGPoint(x: self.size.width - 30, y: timerCenterY - 7)
+        labelScores.position = CGPoint(x: self.size.width - 45, y: timerCenterY - 7)
         labelScores.zPosition = 1
         self.addChild(labelScores)
     }
