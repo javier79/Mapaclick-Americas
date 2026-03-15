@@ -105,8 +105,8 @@ class AlphabeticGameScene: SKScene{
     
          
     override func didMove(to view: SKView){
-        NotificationCenter.default.addObserver(self, selector: #selector(adWillShow), name: AdManager.adWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(adDismissed), name: AdManager.adDismissedNotification, object: nil)
+        // NotificationCenter.default.addObserver(self, selector: #selector(adWillShow), name: AdManager.adWillShowNotification, object: nil)
+        // NotificationCenter.default.addObserver(self, selector: #selector(adDismissed), name: AdManager.adDismissedNotification, object: nil)
 
         backgroundNode = gameSceneObjects.createSceneBackground(scene: self)
         
@@ -198,7 +198,7 @@ class AlphabeticGameScene: SKScene{
 
         // Remove texture so .size controls dimensions directly
         mapRectangleBackground.texture = nil
-        mapRectangleBackground.color = UIColor.init(red: 0.2588, green: 0.7608, blue: 1.0, alpha: 1.0)
+        mapRectangleBackground.color = UIColor.yellow//UIColor.init(red: 0.2588, green: 0.7608, blue: 1.0, alpha: 1.0)
         mapRectangleBackground.colorBlendFactor = 1.0
         mapRectangleBackground.xScale = 1.0
         mapRectangleBackground.yScale = 1.0
@@ -214,7 +214,7 @@ class AlphabeticGameScene: SKScene{
         addChildSKLabelNodeToParentSKSpriteNode(parent: countriesNameBackground, children: countryNameLabel)
         addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: countriesNameBackground)
         resizeCountryNameBackground()
-        addChildSKLabelNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: labelScores)
+        //addChildSKLabelNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: labelScores)
         addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: skipButton)
         addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: exitRedButton)
         addChildSKSpriteNodeToParentself(children: controlPanelSKSpriteNode)
@@ -253,11 +253,11 @@ class AlphabeticGameScene: SKScene{
         if TutorialManager.shouldShowTutorial() {
                     showTutorial()
                 }
-        //Ads Logic
-        if !TutorialManager.shouldShowTutorial() {
-            showAdIfNeeded()
-        }
-        
+        // //Ads Logic
+        // if !TutorialManager.shouldShowTutorial() {
+        //     showAdIfNeeded()
+        // }
+
     }
     //Ads Logic
     @objc func adWillShow() {
@@ -281,19 +281,19 @@ class AlphabeticGameScene: SKScene{
         self.run(SKAction.sequence([waitAction, showAction]))
     }*/
     
-    func showAdIfNeeded() {
-        let waitAction = SKAction.wait(forDuration: 0.1)
-        let showAction = SKAction.run { [weak self] in
-            AdManager.shared.showInterstitialForGameStart()
-            // If no interstitial was shown, show a banner at top instead
-            if !AdManager.shared.lastGameStartShowedAd {
-                if let viewController = self?.view?.window?.rootViewController {
-                    AdManager.shared.showBannerAtTop(in: viewController)
-                }
-            }
-        }
-        self.run(SKAction.sequence([waitAction, showAction]))
-    }
+    // func showAdIfNeeded() {
+    //     let waitAction = SKAction.wait(forDuration: 0.1)
+    //     let showAction = SKAction.run { [weak self] in
+    //         AdManager.shared.showInterstitialForGameStart()
+    //         // If no interstitial was shown, show a banner at top instead
+    //         if !AdManager.shared.lastGameStartShowedAd {
+    //             if let viewController = self?.view?.window?.rootViewController {
+    //                 AdManager.shared.showBannerAtTop(in: viewController)
+    //             }
+    //         }
+    //     }
+    //     self.run(SKAction.sequence([waitAction, showAction]))
+    // }
     
     
     //Execute attributes for scaling and positioning based on device screen size
@@ -469,7 +469,7 @@ class AlphabeticGameScene: SKScene{
         // the single source of truth, and zoom/pan logic reads from these properties.
         baseMapScale = mapScale
         baseMapPosition = CGPoint(x: centerX, y: centerY)
-        maxZoomScale = mapScale * 3.0  // User can zoom up to 3x the base size
+        maxZoomScale = mapScale * 5.0  // User can zoom up to 5x the base size
 
         controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y: (controlPanelHeight / 2) - 1)
 
@@ -492,9 +492,10 @@ class AlphabeticGameScene: SKScene{
         countriesNameBackground.position = CGPoint(x: 0, y: 0.5)
 
         // Move labelScores to far right at same height as timer (reparent from controlPanel to self)
-        labelScores.removeFromParent()
+        //labelScores.removeFromParent()
         labelScores.fontSize = 14
         labelScores.position = CGPoint(x: self.size.width - 30, y: timerCenterY - 7)
+        labelScores.zPosition = 1
         self.addChild(labelScores)
     }
     //Execute attributes for scaling and positioning based on device screen size
@@ -1600,7 +1601,7 @@ class AlphabeticGameScene: SKScene{
     
     func goToGameOverScene(){
         musicPlayer?.stop()
-        AdManager.shared.removeBanner()
+        // AdManager.shared.removeBanner()
         let gameOverScene = GameOverScene(size: self.size)
         let transition = SKTransition.fade(withDuration: 1.5)
         self.view?.presentScene(gameOverScene, transition: transition)
@@ -2589,7 +2590,7 @@ class AlphabeticGameScene: SKScene{
     //transition to StartMenu Scene when exit button is pressed
     func goToStartMenu(){
         musicPlayer?.stop()
-        AdManager.shared.removeBanner()
+        // AdManager.shared.removeBanner()
         let startMenuScene = StartMenuScene(size: self.size)
         self.view?.presentScene(startMenuScene)
     }

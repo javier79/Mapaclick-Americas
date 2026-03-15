@@ -83,8 +83,8 @@ class PracticeRandomGameScene: SKScene{
     
     override func didMove(to view: SKView){
         //Ads Logic
-        NotificationCenter.default.addObserver(self, selector: #selector(adWillShow), name: AdManager.adWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(adDismissed), name: AdManager.adDismissedNotification, object: nil)
+        // NotificationCenter.default.addObserver(self, selector: #selector(adWillShow), name: AdManager.adWillShowNotification, object: nil)
+        // NotificationCenter.default.addObserver(self, selector: #selector(adDismissed), name: AdManager.adDismissedNotification, object: nil)
         backgroundNode = gameSceneObjects.createSceneBackground(scene: self)
         //self.backgroundColor = UIColor.init(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0)//blue background that resembles the ocean
         
@@ -205,12 +205,12 @@ class PracticeRandomGameScene: SKScene{
         if TutorialManager.shouldShowTutorial() {
             showTutorial()
         }
-        //Ads Logic
-        if !TutorialManager.shouldShowTutorial() {
-            showAdIfNeeded()
-        }
+        // //Ads Logic
+        // if !TutorialManager.shouldShowTutorial() {
+        //     showAdIfNeeded()
+        // }
     }
-    
+
     //Ads Logic
     @objc func adWillShow() {
         isAdShowing = true
@@ -234,17 +234,17 @@ class PracticeRandomGameScene: SKScene{
     }*/
     
     func showAdIfNeeded() {
-        let waitAction = SKAction.wait(forDuration: 0.1)
-        let showAction = SKAction.run { [weak self] in
-            AdManager.shared.showInterstitialForGameStart()
-            // If no interstitial was shown, show a banner at top instead
-            if !AdManager.shared.lastGameStartShowedAd {
-                if let viewController = self?.view?.window?.rootViewController {
-                    AdManager.shared.showBannerAtTop(in: viewController)
-                }
-            }
-        }
-        self.run(SKAction.sequence([waitAction, showAction]))
+        // let waitAction = SKAction.wait(forDuration: 0.1)
+        // let showAction = SKAction.run { [weak self] in
+        //     AdManager.shared.showInterstitialForGameStart()
+        //     // If no interstitial was shown, show a banner at top instead
+        //     if !AdManager.shared.lastGameStartShowedAd {
+        //         if let viewController = self?.view?.window?.rootViewController {
+        //             AdManager.shared.showBannerAtTop(in: viewController)
+        //         }
+        //     }
+        // }
+        // self.run(SKAction.sequence([waitAction, showAction]))
     }
     
     //Execute attributes for scaling and positioning based on device screen size
@@ -1593,7 +1593,7 @@ class PracticeRandomGameScene: SKScene{
     
     func goToGameOverScene(){
         musicPlayer?.stop()
-        AdManager.shared.removeBanner()
+        // AdManager.shared.removeBanner()
         let gameOverScene = GameOverScene(size: self.size)
         let transition = SKTransition.fade(withDuration: 1.5)
         self.view?.presentScene(gameOverScene, transition: transition)
@@ -1908,7 +1908,7 @@ class PracticeRandomGameScene: SKScene{
        
     func goToStartMenu(){
         musicPlayer?.stop()
-        AdManager.shared.removeBanner()
+        // AdManager.shared.removeBanner()
         let startMenuScene = StartMenuScene(size: self.size)
         self.view?.presentScene(startMenuScene)
     }

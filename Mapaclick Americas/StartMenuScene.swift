@@ -146,7 +146,7 @@ class StartMenuScene: SKScene {
         let waitForBanner = SKAction.wait(forDuration: 0.5)
         let showBanner = SKAction.run { [weak self] in
             if let viewController = self?.view?.window?.rootViewController {
-                AdManager.shared.showBanner(in: viewController)
+                 //AdManager.shared.showBanner(in: viewController)
             }
         }
         self.run(SKAction.sequence([waitForBanner, showBanner]))
@@ -1759,13 +1759,13 @@ class StartMenuScene: SKScene {
                 //opcionesCheckboxTwo.addChild(opcionesCheckmarkTwo)
             }
             
-            if StoreManager.isAdRemovalPurchased() {
-                removeAdsButton.isHidden = true
-                //restorePurchasesButton.isHidden = true
-            } else {
-                removeAdsButton.isHidden = false
-                //restorePurchasesButton.isHidden = false
-            }
+            // if StoreManager.isAdRemovalPurchased() {
+            //     removeAdsButton.isHidden = true
+            //     //restorePurchasesButton.isHidden = true
+            // } else {
+            //     removeAdsButton.isHidden = false
+            //     //restorePurchasesButton.isHidden = false
+            // }
             
             /** opciones is the label parent on opciones screen*/
             addChildSKLabelNodeToself(children: opcionesAudioLabel)
@@ -2149,7 +2149,7 @@ class StartMenuScene: SKScene {
         if (gameModeSelectionGreenButton.name == nodeTouched.node?.name){
             if dropDownArrowLabel.text == "Puerto Rico" && dropDownArrowLabelTwo.text == "Alfabético (Alphabetic)"{
                 musicPlayer?.stop()// ADD THIS from Claude to close music player on transitions
-                AdManager.shared.removeBanner()
+                // AdManager.shared.removeBanner()
                 let alphabeticGameScene = AlphabeticGameScene(size: self.size)
                 //self.removeAllActions()
                 //self.removeAllChildren()
@@ -2157,7 +2157,7 @@ class StartMenuScene: SKScene {
             }
             if dropDownArrowLabel.text == "Puerto Rico" && dropDownArrowLabelTwo.text == "Al Azar (Random)"{
                 musicPlayer?.stop()  // ADD THIS from Claude to close music player on transitions
-                AdManager.shared.removeBanner()
+                // AdManager.shared.removeBanner()
                 let randomGame = RandomGameScene(size: self.size)
                 //self.removeAllActions()
                 //self.removeFromParent()
@@ -2170,7 +2170,7 @@ class StartMenuScene: SKScene {
             /**Selection for practiceAlphabeticGame*/
             if dropDownArrowLabel.text == "Puerto Rico" && dropDownArrowLabelTwo.text == "Alfabético (Alphabetic)"{
                 musicPlayer?.stop()  // ADD THIS from Claude to close music player on transitions
-                AdManager.shared.removeBanner()
+                // AdManager.shared.removeBanner()
                 StartMenuScene.playPracticeAlphabeticGame = true
                 let practiceAlphabeticGame = PracticeAlphabeticGameScene(size: self.size)
                 //self.removeAllActions()
@@ -2180,7 +2180,7 @@ class StartMenuScene: SKScene {
             /**Selection for practiceRandomGame*/
             if dropDownArrowLabel.text == "Puerto Rico" && dropDownArrowLabelTwo.text == "Al Azar (Random)"{
                 musicPlayer?.stop()  // ADD THIS from Claude to close music player on transitions
-                AdManager.shared.removeBanner()
+                // AdManager.shared.removeBanner()
                 StartMenuScene.playPracticeRandomGame = true
                 let practiceRandomGame = PracticeRandomGameScene(size: self.size)
                 //self.removeAllActions()
@@ -2226,7 +2226,7 @@ class StartMenuScene: SKScene {
         /**creditosButton when pressed wil navigate the user to creditos screen(view)*/
         else if (creditosButton.name == nodeTouched.node?.name){
             opcionesAudioLabel.removeFromParent()
-            AdManager.shared.hideBanner()
+            // AdManager.shared.hideBanner()
             if creditsContainerChildrenNotInitSet == true{
                 initSetcreditsContainerChildren()
                 creditsContainerChildrenNotInitSet = false
@@ -2237,22 +2237,22 @@ class StartMenuScene: SKScene {
             //self.addChild(creditsContainerTwo)
         }
         
-        else if (removeAdsButton.name == nodeTouched.node?.name){
-            StoreManager.shared.onPurchaseComplete = { [weak self] in
-                self?.removeAdsButton.isHidden = true
-            }
-            StoreManager.shared.onPurchaseFailed = { errorMessage in
-                print("Purchase failed: \(errorMessage)")
-            }
-            StoreManager.shared.purchaseRemoveAds()
-        }
-        
-        else if (restorePurchasesButton.name == nodeTouched.node?.name){
-            StoreManager.shared.onPurchaseComplete = { [weak self] in
-                self?.removeAdsButton.isHidden = true
-            }
-            StoreManager.shared.restorePurchases()
-        }
+        // else if (removeAdsButton.name == nodeTouched.node?.name){
+        //     StoreManager.shared.onPurchaseComplete = { [weak self] in
+        //         self?.removeAdsButton.isHidden = true
+        //     }
+        //     StoreManager.shared.onPurchaseFailed = { errorMessage in
+        //         print("Purchase failed: \(errorMessage)")
+        //     }
+        //     StoreManager.shared.purchaseRemoveAds()
+        // }
+
+        // else if (restorePurchasesButton.name == nodeTouched.node?.name){
+        //     StoreManager.shared.onPurchaseComplete = { [weak self] in
+        //         self?.removeAdsButton.isHidden = true
+        //     }
+        //     StoreManager.shared.restorePurchases()
+        // }
         
         /**Manages touch evaluation for returnVolver button when it display in opciones view*/
         else if (returnVolverRedButton.name == nodeTouched.node?.name /*&& opcionesAudioLabel.parent != nil*/){
@@ -2268,7 +2268,7 @@ class StartMenuScene: SKScene {
         if (returnVolverRedButton.name == nodeTouched.node?.name /*&& creditsContainer.parent != nil*/){
             creditsContainer.removeFromParent()
             creditsContainerTwo.removeFromParent()
-            AdManager.shared.showBannerAgain()
+            // AdManager.shared.showBannerAgain()
             addChildSKLabelNodeToself(children: opcionesAudioLabel)
             //self.addChild(opcionesAudioLabel)
         }

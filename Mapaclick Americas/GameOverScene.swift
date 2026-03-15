@@ -36,8 +36,8 @@ class GameOverScene: SKScene{
     let screenSize = UIScreen.main.nativeBounds
     
     override func didMove(to view: SKView) {
-        NotificationCenter.default.addObserver(self, selector: #selector(adWillShow), name: AdManager.adWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(adDismissed), name: AdManager.adDismissedNotification, object: nil)
+        // NotificationCenter.default.addObserver(self, selector: #selector(adWillShow), name: AdManager.adWillShowNotification, object: nil)
+        // NotificationCenter.default.addObserver(self, selector: #selector(adDismissed), name: AdManager.adDismissedNotification, object: nil)
 
         //PracticeAlphabeticGame.completedGame = true
         
@@ -146,7 +146,7 @@ class GameOverScene: SKScene{
         
         self.isUserInteractionEnabled = false
         showGameOverAd()
-        AdManager.shared.markFirstGameCompleted()
+        // AdManager.shared.markFirstGameCompleted()
     }
     
     @objc func adWillShow() {
@@ -175,16 +175,16 @@ class GameOverScene: SKScene{
     }*/
     
     func showGameOverAd() {
-        if AdManager.shared.hasAdReady() {
-            let waitAction = SKAction.wait(forDuration: 1.0)
-            let showAction = SKAction.run {
-                AdManager.shared.showInterstitialForGameOver()
-            }
-            self.run(SKAction.sequence([waitAction, showAction]))
-        } else {
+        // if AdManager.shared.hasAdReady() {
+        //     let waitAction = SKAction.wait(forDuration: 1.0)
+        //     let showAction = SKAction.run {
+        //         AdManager.shared.showInterstitialForGameOver()
+        //     }
+        //     self.run(SKAction.sequence([waitAction, showAction]))
+        // } else {
             self.isUserInteractionEnabled = true
             enableTouchInteraction()
-        }
+        // }
     }
 
     func enableTouchInteraction() {
