@@ -426,8 +426,8 @@ class AlphabeticGameScene: SKScene{
         let mapWidth: CGFloat = 390.0
         let mapHeight: CGFloat = 580.0
         let controlPanelHeight: CGFloat = 60.0
-        let topMargin: CGFloat = 5.0
-        let horizontalMargin: CGFloat = 2.0
+        let topMargin: CGFloat = 50.0
+        let horizontalMargin: CGFloat = 36.0
         let availableWidth = self.size.width - (horizontalMargin * 2)
         let availableHeight = self.size.height - controlPanelHeight - topMargin
         let scaleX = availableWidth / mapWidth
@@ -457,10 +457,10 @@ class AlphabeticGameScene: SKScene{
         // Control panel children positioning for portrait (small screens)
         // Layout: [Exit] [Country Name] [Skip]
         exitRedButton.setScale(1.30)
-        exitRedButton.position = CGPoint(x: -130, y: 0.5)
+        exitRedButton.position = CGPoint(x: -110, y: 0.5)
 
         skipButton.setScale(1.30)
-        skipButton.position = CGPoint(x: 130, y: 0.5)
+        skipButton.position = CGPoint(x: 110, y: 0.5)
 
         countriesNameBackground.setScale(1.10)
         countriesNameBackground.position = CGPoint(x: 0, y: 0.5)
@@ -468,7 +468,7 @@ class AlphabeticGameScene: SKScene{
         // Move labelScores to far right at same height as timer (reparent from controlPanel to self)
         //labelScores.removeFromParent()
         labelScores.fontSize = 14
-        labelScores.position = CGPoint(x: self.size.width - 45, y: timerCenterY - 7)
+        labelScores.position = CGPoint(x: self.size.width - 60, y: timerCenterY - 7)
         labelScores.zPosition = 1
         self.addChild(labelScores)
     }
