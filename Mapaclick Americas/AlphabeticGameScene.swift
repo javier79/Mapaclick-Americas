@@ -2389,16 +2389,36 @@ class AlphabeticGameScene: SKScene{
     
     /**following function pass text attributes for the next country name to look up and adjust the background size for the label(countryNameLabel) */
     func setNewCountryNameToLookUp(){
+        countryNameLabel.fontSize = 20 // Reset to default before measuring
         countryNameLabel.text = countries_names_array [currentIndex] //Writes to label the next country name to be located by player
         resizeCountryNameBackground()
     }
 
-    /// Dynamically resizes countriesNameBackground to fit the current countryNameLabel text with rounded corners and border
+    /// Dynamically resizes countriesNameBackground to fit the current countryNameLabel text with rounded corners and border.
+    /// Auto-shrinks the font if the name is too long to fit between the Salir/Saltar buttons.
     func resizeCountryNameBackground(){
         let horizontalPadding: CGFloat = 36.0
-        let textWidth = countryNameLabel.frame.size.width
-        let newWidth = textWidth + horizontalPadding
         let bgHeight: CGFloat = 30.0
+        let bgScale: CGFloat = 1.10
+        // Buttons are at x:±110, each 50pt base * 1.30 scale = 65pt wide, inner edges at ±77.5
+        // Max visual width with 8pt gap on each side: 155 - 16 = 139pt
+        let maxVisualWidth: CGFloat = 139.0
+        let maxUnscaledWidth: CGFloat = maxVisualWidth / bgScale
+        let minFontSize: CGFloat = 12.0
+
+        // Shrink font if text + padding exceeds max width
+        let defaultFontSize: CGFloat = 20.0
+        var textWidth = countryNameLabel.frame.size.width
+        while textWidth + horizontalPadding > maxUnscaledWidth && countryNameLabel.fontSize > minFontSize {
+            countryNameLabel.fontSize -= 1
+            textWidth = countryNameLabel.frame.size.width
+        }
+
+        // Adjust label y position — smaller fonts need a slight upward nudge to stay centered
+        let fontShrinkAmount = defaultFontSize - countryNameLabel.fontSize
+        countryNameLabel.position.y = -7.5 + (fontShrinkAmount * 0.15)
+
+        let newWidth = min(textWidth + horizontalPadding, maxUnscaledWidth)
 
         let roundedPath = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: newWidth, height: bgHeight), cornerRadius: bgHeight / 2.0)
         let shapeNode = SKShapeNode(path: roundedPath.cgPath)
