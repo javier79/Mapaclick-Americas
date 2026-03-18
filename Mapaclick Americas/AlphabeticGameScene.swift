@@ -1039,8 +1039,9 @@ class AlphabeticGameScene: SKScene{
             debugPrint("iPad 6Gen, iPad Mini(5gen 18.6), iPad Mini(6gen 18.6), iPad Mini(A17Pro 18.6) scaling is limited")
         }
         
-        else if screenSize.width == 1242.0 && screenSize.height == 2288.0 || screenSize.width == 828.0 && screenSize.height == 1792.0 || screenSize.width == 1242.0 && screenSize.height == 2688.0{
-            
+        // Commented out — now falls through to dynamic else block using baseMapScale/maxZoomScale
+        /*else if screenSize.width == 1242.0 && screenSize.height == 2288.0 || screenSize.width == 828.0 && screenSize.height == 1792.0 || screenSize.width == 1242.0 && screenSize.height == 2688.0{
+
             if mapRectangleGestureMGMT.xScale * sender.scale < 1.45 {
                 sender.scale = 1.45 / mapRectangleGestureMGMT.xScale
             } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
@@ -1053,10 +1054,11 @@ class AlphabeticGameScene: SKScene{
             sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
             }
             debugPrint("iPhone Xr(18.6), 11(18.6), Xs Max(18.6), 11 Pro Max(18.6) scaling is limited")
-        }
+        }*/
         
-        else if screenSize.width == 1170.0 && screenSize.height == 2532.0 || screenSize.width == 1179.0 && screenSize.height == 2556.0{
-            
+        // Commented out — now falls through to dynamic else block using baseMapScale/maxZoomScale
+        /*else if screenSize.width == 1170.0 && screenSize.height == 2532.0 || screenSize.width == 1179.0 && screenSize.height == 2556.0{
+
             if mapRectangleGestureMGMT.xScale * sender.scale < 1.37 {
                 sender.scale = 1.37 / mapRectangleGestureMGMT.xScale
             } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
@@ -1069,10 +1071,11 @@ class AlphabeticGameScene: SKScene{
             sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
             }
             debugPrint("iPhone 12, iPhone 12Pro, iPhone 13, iPhone 13 Pro, iPhone 14, iPhone 14 Pro, iPhone 15, iPhone 15 Pro, iPhone 16, iPhone 16e scaling is limited")
-        }
+        }*/
         
-        else if screenSize.width == 1284.0 && screenSize.height == 2778.0 || screenSize.width == 1290.0 && screenSize.height == 2796.0{
-            
+        // Commented out — now falls through to dynamic else block using baseMapScale/maxZoomScale
+        /*else if screenSize.width == 1284.0 && screenSize.height == 2778.0 || screenSize.width == 1290.0 && screenSize.height == 2796.0{
+
             if mapRectangleGestureMGMT.xScale * sender.scale < 1.5 {
                 sender.scale = 1.5 / mapRectangleGestureMGMT.xScale
             } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
@@ -1085,10 +1088,11 @@ class AlphabeticGameScene: SKScene{
             sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
             }
             debugPrint("iPhone 12ProMax, iPhone 13 Pro Max, iPhone 14 plus, iPhone 14 ProMax, iPhone 15 plus, iPhone 15 ProMax, iPhone 16 Plus scaling is limited")
-        }
+        }*/
         
-        else if screenSize.width == 1206.0 && screenSize.height == 2622.0 /*|| screenSize.width == 1179.0 && screenSize.height == 2556.0*/{
-            
+        // Commented out — now falls through to dynamic else block using baseMapScale/maxZoomScale
+        /*else if screenSize.width == 1206.0 && screenSize.height == 2622.0 /*|| screenSize.width == 1179.0 && screenSize.height == 2556.0*/{
+
             if mapRectangleGestureMGMT.xScale * sender.scale < 1.37 {
                 sender.scale = 1.37 / mapRectangleGestureMGMT.xScale
             } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
@@ -1101,10 +1105,11 @@ class AlphabeticGameScene: SKScene{
             sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
             }
             debugPrint("iPhone 16 PRO, iPhone 17, iPhone 17 PRO scaling is limited")
-        }
+        }*/
         
-        else if screenSize.width == 1320.0 && screenSize.height == 2868.0 {
-            
+        // Commented out — now falls through to dynamic else block using baseMapScale/maxZoomScale
+        /*else if screenSize.width == 1320.0 && screenSize.height == 2868.0 {
+
             if mapRectangleGestureMGMT.xScale * sender.scale < 1.5 {
                 sender.scale = 1.5 / mapRectangleGestureMGMT.xScale
             } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
@@ -1117,7 +1122,7 @@ class AlphabeticGameScene: SKScene{
             sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
             }
             debugPrint("iPhone 16 ProMAX, iPhone 17 ProMAX scaling is limited")
-        }
+        }*/
         
         // Dynamic zoom clamping for screens (750,1334), (1080,2340), (1125,2436) and default fallback.
         // Uses baseMapScale (minimum/default zoom) and maxZoomScale (maximum zoom-in) instead of
@@ -1167,40 +1172,45 @@ class AlphabeticGameScene: SKScene{
                 }
             }
             
-            else if screenSize.width == 1242.0 && screenSize.height == 2288.0 || screenSize.width == 828.0 && screenSize.height == 1792.0 || screenSize.width == 1242.0 && screenSize.height == 2688.0{
+            // Commented out — now falls through to dynamic else block using baseMapScale
+            /*else if screenSize.width == 1242.0 && screenSize.height == 2288.0 || screenSize.width == 828.0 && screenSize.height == 1792.0 || screenSize.width == 1242.0 && screenSize.height == 2688.0{
                 if mapRectangleGestureMGMT.xScale > 1.45 && mapRectangleGestureMGMT.yScale > 1.45{
                     isScaled = true
                     debugPrint("iPhone Xr(18.6), 11(18.6), Xs Max(18.6), 11 Pro Max(18.6) is Scaled")
                 }
-            }
+            }*/
             
-            else if screenSize.width == 1170.0 && screenSize.height == 2532.0 || screenSize.width == 1179.0 && screenSize.height == 2556.0 {
+            // Commented out — now falls through to dynamic else block using baseMapScale
+            /*else if screenSize.width == 1170.0 && screenSize.height == 2532.0 || screenSize.width == 1179.0 && screenSize.height == 2556.0 {
                 if mapRectangleGestureMGMT.xScale > 1.37 && mapRectangleGestureMGMT.yScale > 1.37{
                     isScaled = true
                     debugPrint("iPhone 12, iPhone 12Pro, iPhone 13, iPhone 13 Pro, iPhone 14, iPhone 14 Pro, iPhone 15, iPhone 15 Pro, iPhone 16, iPhone 16e is Scaled")
                 }
-            }
+            }*/
             
-            else if screenSize.width == 1284.0 && screenSize.height == 2778.0 || screenSize.width == 1290.0 && screenSize.height == 2796.0 {
+            // Commented out — now falls through to dynamic else block using baseMapScale
+            /*else if screenSize.width == 1284.0 && screenSize.height == 2778.0 || screenSize.width == 1290.0 && screenSize.height == 2796.0 {
                 if mapRectangleGestureMGMT.xScale > 1.5 && mapRectangleGestureMGMT.yScale > 1.5{
                     isScaled = true
                     debugPrint("iPhone 12ProMax, iPhone 13 Pro Max, iPhone 14 plus, iPhone 14 ProMax, iPhone 15 plus, iPhone 15 ProMax, iPhone 16 Plus is Scaled")
                 }
-            }
+            }*/
             
-            else if screenSize.width == 1206.0 && screenSize.height == 2622.0 /*|| screenSize.width == 1179.0 && screenSize.height == 2556.0*/ {
+            // Commented out — now falls through to dynamic else block using baseMapScale
+            /*else if screenSize.width == 1206.0 && screenSize.height == 2622.0 /*|| screenSize.width == 1179.0 && screenSize.height == 2556.0*/ {
                 if mapRectangleGestureMGMT.xScale > 1.37 && mapRectangleGestureMGMT.yScale > 1.37{
                     isScaled = true
                     debugPrint("iPhone 16 PRO, iPhone 17, iPhone 17 PRO is Scaled")
                 }
-            }
+            }*/
             
-            else if screenSize.width == 1320.0 && screenSize.height == 2868.0 {
+            // Commented out — now falls through to dynamic else block using baseMapScale
+            /*else if screenSize.width == 1320.0 && screenSize.height == 2868.0 {
                 if mapRectangleGestureMGMT.xScale > 1.5 && mapRectangleGestureMGMT.yScale > 1.5{
                     isScaled = true
                     debugPrint("iPhone 16 ProMax, iPhone 17 ProMax is Scaled")
                 }
-            }
+            }*/
             
             
             // Dynamic isScaled check for screens (750,1334), (1080,2340), (1125,2436) and default fallback.
@@ -1247,56 +1257,61 @@ class AlphabeticGameScene: SKScene{
             // When the user pinches back to baseMapScale (within tolerance), the map resets:
             // isScaled is set to false (disabling panning) and position snaps to baseMapPosition
             // (the original centered position computed by the positioning function during didMove).
-            case (750.0, 1334.0), (1080.0, 2340.0),(1125.0, 2436.0):
+            case (750.0, 1334.0), (1080.0, 2340.0),(1125.0, 2436.0), (1242.0, 2208.0), (828.0, 1792.0), (1242.0, 2688.0), (1170.0, 2532.0), (1179.0, 2556.0), (1284.0, 2778.0), (1290.0, 2796.0), (1206.0, 2622.0), (1320.0, 2868.0):
                     if abs(mapRectangleGestureMGMT.xScale - baseMapScale) < tolerance && abs(mapRectangleGestureMGMT.yScale - baseMapScale) < tolerance {
                         isScaled = false
                         mapRectangleGestureMGMT.position = baseMapPosition
-                        debugPrint("Dynamic snap-back: base=\(baseMapScale) — iPhoneSE(2nd/3rd gen), 8, iPhone 12 mini, iPhone 13 mini, iPhone X, iPhone XS, iPhone 11 PRO back to original position")
+                        debugPrint("Dynamic snap-back: base=\(baseMapScale) — iPhoneSE(2nd/3rd gen), 8, iPhone 12 mini, 13 mini, X, XS, 11 PRO, Xr, 11, Xs Max, 11 Pro Max, 12, 12Pro, 13, 13Pro, 14, 14Pro, 15, 15Pro, 16, 16e, 12ProMax, 13ProMax, 14plus, 14ProMax, 15plus, 15ProMax, 16Plus back to original position")
                     }
 
-            case (1242.0, 2208.0), (828.0, 1792.0 ),(1242.0, 2688.0 ) :
+            // Commented out — now merged into dynamic snap-back case above
+            /*case (1242.0, 2208.0), (828.0, 1792.0 ),(1242.0, 2688.0 ) :
                 //debugPrint("iPhone 8plus, XR, 11, XSMax, 11ProMax")
                 if abs(mapRectangleGestureMGMT.xScale - 1.45) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.45) < tolerance {
                     isScaled = false
                     mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.716/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
                     debugPrint("iPhone Xr, 11, Xs Max, 11 Pro Max is back to original position")
-                }
+                }*/
                     
                 
                 
-            case (1170.0, 2532.0), (1179.0, 2556.0):
+            // Commented out — now merged into dynamic snap-back case above
+            /*case (1170.0, 2532.0), (1179.0, 2556.0):
                  //debugPrint("iPhone 12, 12Pro, 13, 13Pro, 14, 14Pro")
                  if abs(mapRectangleGestureMGMT.xScale - 1.37) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.37) < tolerance {
                     isScaled = false
                      mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.67/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
                     debugPrint("iPhone 12, iPhone 12Pro, iPhone 13, iPhone 13 Pro, iPhone 14, iPhone 14 Pro, iPhone 15, iPhone 15 Pro, iPhone 16, iPhone 16e is back to original position")
-                }
+                }*/
                     
                 
                 
-            case (1284.0, 2778.0), (1290.0, 2796.0):
+            // Commented out — now merged into dynamic snap-back case above
+            /*case (1284.0, 2778.0), (1290.0, 2796.0):
                  //debugPrint("iPhone 12ProMax, 13ProMax, 14plus, 13Pro, 14ProMax")
                  if abs(mapRectangleGestureMGMT.xScale - 1.5) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.5) < tolerance {
                     isScaled = false
                      mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.72/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
                     debugPrint("iPhone 12ProMax, iPhone 13 Pro Max, iPhone 14 plus, iPhone 14 ProMax, iPhone 15 plus, iPhone 15 ProMax, iPhone 16 Plus is back to original position")
-                }
+                }*/
                 
-            case (1206.0, 2622.0):
+            // Commented out — now merged into dynamic snap-back case above
+            /*case (1206.0, 2622.0):
                  //debugPrint("iPhone 12, 12Pro, 13, 13Pro, 14, 14Pro")
                  if abs(mapRectangleGestureMGMT.xScale - 1.37) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.37) < tolerance {
                     isScaled = false
                      mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.72/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
                     debugPrint("iPhone 16 PRO, iPhone 17, iPhone 17 PRO is back to original position")
-                }
+                }*/
                 
-            case (1320.0, 2868.0):
+            // Commented out — now merged into dynamic snap-back case above
+            /*case (1320.0, 2868.0):
                  //debugPrint("iPhone 12ProMax, 13ProMax, 14plus, 13Pro, 14ProMax")
                  if abs(mapRectangleGestureMGMT.xScale - 1.5) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.5) < tolerance {
                     isScaled = false
                      mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.765/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
                     debugPrint("iPhone 16 ProMax, iPhone 17 ProMax is back to original position")
-                }
+                }*/
                     
                     
                 // Default fallback uses the same dynamic snap-back logic.
