@@ -670,47 +670,31 @@ class AlphabeticGameScene: SKScene{
                 return
             }
         
-        //Asses screen
-        let screenSize = self.view?.bounds.size
-        let screenWidth = screenSize?.width ?? 0
-        let screenHeight = screenSize?.height ?? 0
-        
-        // Pan boundaries are zoom-aware: they expand proportionally as the user zooms in,
-        // allowing more panning range at higher zoom levels. At base zoom (zoomRatio=1.0)
-        // boundaries stay tight around center. At max zoom (zoomRatio=3.0) boundaries
-        // expand significantly so the user can reach edges like Greenland (top-right).
-        // minY and maxY use the same multiplier (0.4) for symmetric up/down panning.
+        // Pan boundaries in scene coordinates, expanding with zoom level.
+        // Uses (zoomRatio - 1) so at base zoom (no zoom) there's zero pan range,
+        // and boundaries grow proportionally as the user zooms in — allowing them
+        // to reach map edges (Greenland top, Argentina bottom) without the map
+        // ever disappearing off screen.
         let zoomRatio = mapRectangleGestureMGMT.xScale / baseMapScale
-        let minX = screenWidth * (0.5 - (zoomRatio * 0.48))
-        let maxX = screenWidth * (0.5 + (zoomRatio * 0.48))
-        let minY = screenHeight * (0.5 - (zoomRatio * 0.4))
-        let maxY = screenHeight * (0.5 + (zoomRatio * 0.4))
-        
-        //Flag variable allows pan only when zoom in have taken place
-        if isScaled == true{
-            /*var touchLocation: CGPoint = gesture.location(in: gesture.view)
-            touchLocation = self.convertPoint(fromView: touchLocation)
-            let moveAction = SKAction.move(to: touchLocation, duration: 0.5)
-            moveAction.timingMode = .linear//.easeInEaseOut
-            containerSKSPriteNode.run(moveAction)*/
-            
-            //Contraints for limiting panning
-            let translation = gesture.translation(in: gesture.view)
-            if mapRectangleGestureMGMT.position.x > maxX {
-                mapRectangleGestureMGMT.position.x = maxX
-            } else if mapRectangleGestureMGMT.position.x < minX {
-                mapRectangleGestureMGMT.position.x = minX
-            }
+        let panFactor = max(0, zoomRatio - 1)
+        let halfWidth = self.size.width / 2
+        let halfHeight = self.size.height / 2
+        let minX = baseMapPosition.x - panFactor * halfWidth * 0.7
+        let maxX = baseMapPosition.x + panFactor * halfWidth * 0.7
+        let minY = baseMapPosition.y - panFactor * halfHeight * 0.45
+        let maxY = baseMapPosition.y + panFactor * halfHeight * 0.45
 
-            if mapRectangleGestureMGMT.position.y > maxY {
-                mapRectangleGestureMGMT.position.y = maxY
-            } else if mapRectangleGestureMGMT.position.y < minY {
-                mapRectangleGestureMGMT.position.y = minY
-            }
-            //pan execution
-            mapRectangleGestureMGMT.position = CGPoint(x: mapRectangleGestureMGMT.position.x + translation.x, y: mapRectangleGestureMGMT.position.y - translation.y)
+        //Flag variable allows pan only when zoom in have taken place
+        if isScaled == true {
+            let translation = gesture.translation(in: gesture.view)
+
+            // Apply translation first, then clamp to boundaries
+            // (old code clamped before translating, so position could escape bounds)
+            let newX = max(minX, min(maxX, mapRectangleGestureMGMT.position.x + translation.x))
+            let newY = max(minY, min(maxY, mapRectangleGestureMGMT.position.y - translation.y))
+
+            mapRectangleGestureMGMT.position = CGPoint(x: newX, y: newY)
             gesture.setTranslation(.zero, in: view)
-            
         }
        
     }
