@@ -48,7 +48,20 @@ class InitSetMapNodes{
          let dominicanRepublicSKSpriteNode: SKSpriteNode = dominicanRepublicBezierPathToSKSpriteNode(bpDominicanRepublic: BezierPathsForMapNodesAndRectangles().dominicanRepublicDrawBezierPath())
          let puertoRicoSKSpriteNode: SKSpriteNode = puertoRicoBezierPathToSKSpriteNode(bpPuertoRico: BezierPathsForMapNodesAndRectangles().puertoRicoDrawBezierPath())
          let bahamasSKSpriteNode: SKSpriteNode = bahamasBezierPathToSKSpriteNode(bpBahamas: BezierPathsForMapNodesAndRectangles().bahamasDrawBezierPath())
-        
+
+         // Lesser Antilles — grouped as a single tappable quiz target
+         let lesserAntillesArcSKSpriteNode: SKSpriteNode = lesserAntillesArcToSKSpriteNode()
+         let guadeloupeSKSpriteNode: SKSpriteNode = guadeloupeBezierPathToSKSpriteNode(bpGuadeloupe: BezierPathsForMapNodesAndRectangles().guadeloupeDrawBezierPath())
+         let martiniqueSKSpriteNode: SKSpriteNode = martiniqueBezierPathToSKSpriteNode(bpMartinique: BezierPathsForMapNodesAndRectangles().martiniqueDrawBezierPath())
+         let trinidadAndTobagoSKSpriteNode: SKSpriteNode = trinidadAndTobagoBezierPathToSKSpriteNode(bpTrinidadAndTobago: BezierPathsForMapNodesAndRectangles().trinidadAndTobagoDrawBezierPath())
+         let barbadosSKSpriteNode: SKSpriteNode = barbadosBezierPathToSKSpriteNode(bpBarbados: BezierPathsForMapNodesAndRectangles().barbadosDrawBezierPath())
+         let saintLuciaSKSpriteNode: SKSpriteNode = saintLuciaBezierPathToSKSpriteNode(bpSaintLucia: BezierPathsForMapNodesAndRectangles().saintLuciaDrawBezierPath())
+         let grenadaSKSpriteNode: SKSpriteNode = grenadaBezierPathToSKSpriteNode(bpGrenada: BezierPathsForMapNodesAndRectangles().grenadaDrawBezierPath())
+         let saintVincentSKSpriteNode: SKSpriteNode = saintVincentBezierPathToSKSpriteNode(bpSaintVincent: BezierPathsForMapNodesAndRectangles().saintVincentAndTheGrenadinesDrawBezierPath())
+         let antiguaAndBarbudaSKSpriteNode: SKSpriteNode = antiguaAndBarbudaBezierPathToSKSpriteNode(bpAntiguaAndBarbuda: BezierPathsForMapNodesAndRectangles().antiguaAndBarbudaDrawBezierPath())
+         let dominicaIslandSKSpriteNode: SKSpriteNode = dominicaIslandBezierPathToSKSpriteNode(bpDominica: BezierPathsForMapNodesAndRectangles().dominicaDrawBezierPath())
+         let saintKittsAndNevisSKSpriteNode: SKSpriteNode = saintKittsAndNevisBezierPathToSKSpriteNode(bpSaintKittsAndNevis: BezierPathsForMapNodesAndRectangles().saintKittsAndNevisDrawBezierPath())
+
          addChildSKSpriteNodeToParentSKNode(parent: containerSKNode, children: canadaSKSpriteNode)
          addChildSKSpriteNodeToParentSKNode(parent: containerSKNode, children: unitedStatesSKSpriteNode)
          addChildSKSpriteNodeToParentSKNode(parent: containerSKNode, children: mexicoSKSpriteNode)
@@ -79,7 +92,20 @@ class InitSetMapNodes{
          addChildSKSpriteNodeToParentSKNode(parent: containerSKNode, children: dominicanRepublicSKSpriteNode)
          addChildSKSpriteNodeToParentSKNode(parent: containerSKNode, children: puertoRicoSKSpriteNode)
          addChildSKSpriteNodeToParentSKNode(parent: containerSKNode, children: bahamasSKSpriteNode)
-         
+
+         // Lesser Antilles — island nodes are children of the arc (grouped quiz target)
+         addChildSKSpriteNodeToParentSKSpriteNode(parent: lesserAntillesArcSKSpriteNode, children: guadeloupeSKSpriteNode)
+         addChildSKSpriteNodeToParentSKSpriteNode(parent: lesserAntillesArcSKSpriteNode, children: martiniqueSKSpriteNode)
+         addChildSKSpriteNodeToParentSKSpriteNode(parent: lesserAntillesArcSKSpriteNode, children: trinidadAndTobagoSKSpriteNode)
+         addChildSKSpriteNodeToParentSKSpriteNode(parent: lesserAntillesArcSKSpriteNode, children: barbadosSKSpriteNode)
+         addChildSKSpriteNodeToParentSKSpriteNode(parent: lesserAntillesArcSKSpriteNode, children: saintLuciaSKSpriteNode)
+         addChildSKSpriteNodeToParentSKSpriteNode(parent: lesserAntillesArcSKSpriteNode, children: grenadaSKSpriteNode)
+         addChildSKSpriteNodeToParentSKSpriteNode(parent: lesserAntillesArcSKSpriteNode, children: saintVincentSKSpriteNode)
+         addChildSKSpriteNodeToParentSKSpriteNode(parent: lesserAntillesArcSKSpriteNode, children: antiguaAndBarbudaSKSpriteNode)
+         addChildSKSpriteNodeToParentSKSpriteNode(parent: lesserAntillesArcSKSpriteNode, children: dominicaIslandSKSpriteNode)
+         addChildSKSpriteNodeToParentSKSpriteNode(parent: lesserAntillesArcSKSpriteNode, children: saintKittsAndNevisSKSpriteNode)
+         addChildSKSpriteNodeToParentSKNode(parent: containerSKNode, children: lesserAntillesArcSKSpriteNode)
+
          //Following block adds country name labels to map nodes for Practice games and GameOverScene
          if StartMenuScene.playPracticeAlphabeticGame == true || StartMenuScene.playPracticeRandomGame == true || AlphabeticGameScene.completedGame == true || RandomGameScene.completedGame == true || PracticeAlphabeticGameScene.completedGame == true || PracticeRandomGameScene.completedGame == true{
              setLabelForCountryNameAndAddToNodePractice(nodeSprite:canadaSKSpriteNode)
@@ -112,6 +138,7 @@ class InitSetMapNodes{
              setLabelForCountryNameAndAddToNodePractice(nodeSprite:dominicanRepublicSKSpriteNode)
              setLabelForCountryNameAndAddToNodePractice(nodeSprite:puertoRicoSKSpriteNode)
              setLabelForCountryNameAndAddToNodePractice(nodeSprite:bahamasSKSpriteNode)
+             setLabelForCountryNameAndAddToNodePractice(nodeSprite:lesserAntillesArcSKSpriteNode)
              if StartMenuScene.playPracticeAlphabeticGame == true{
                  StartMenuScene.playPracticeAlphabeticGame = false
              }
@@ -148,9 +175,17 @@ class InitSetMapNodes{
             return line2
         }
         if AlphabeticGameScene.completedGame == true || RandomGameScene.completedGame == true || PracticeAlphabeticGameScene.completedGame == true || PracticeRandomGameScene.completedGame == true{
+             let greenColor = UIColor.init(red: 0, green: 1, blue: 0.949, alpha: 1.0)
              nodeSprite.colorBlendFactor = 0.8
-             nodeSprite.color = UIColor.init(red: 0, green: 1, blue: 0.949, alpha: 1.0)
+             nodeSprite.color = greenColor
              nodeSprite.physicsBody = nil
+             // Color child sprites too (e.g. Lesser Antilles Arc children)
+             for child in nodeSprite.children {
+                 if let childSprite = child as? SKSpriteNode {
+                     childSprite.colorBlendFactor = 0.8
+                     childSprite.color = greenColor
+                 }
+             }
          }
          locationNameLabel.text = nodeSprite.name
          
@@ -307,6 +342,18 @@ class InitSetMapNodes{
             setTwoLineCountryNameLabels(labelLineFirst: firstLineLabel, labelLineSecond: secondLineLabel)
             firstLineLabel.position = CGPoint(x: 0.0, y: 2.0)
             secondLineLabel.position = CGPoint(x: 0.0, y: -6.0)
+            addChildSKLabelNodeToParentSKSpriteNode(parent: nodeSprite, children: firstLineLabel)
+            addChildSKLabelNodeToParentSKSpriteNode(parent: nodeSprite, children: secondLineLabel)
+            return
+         case "Lesser Antilles":
+            // Arc node is at (0,0) — label positions are absolute in container coordinates
+            firstLineLabel.text = "Lesser"
+            secondLineLabel.text = " Antilles"
+            setTwoLineCountryNameLabels(labelLineFirst: firstLineLabel, labelLineSecond: secondLineLabel)
+            firstLineLabel.position = CGPoint(x: 260.0, y: 306.0)
+            secondLineLabel.position = CGPoint(x: 260.0, y: 300.0)
+            firstLineLabel.horizontalAlignmentMode = .left
+            secondLineLabel.horizontalAlignmentMode = .left
             addChildSKLabelNodeToParentSKSpriteNode(parent: nodeSprite, children: firstLineLabel)
             addChildSKLabelNodeToParentSKSpriteNode(parent: nodeSprite, children: secondLineLabel)
             return
@@ -609,5 +656,100 @@ class InitSetMapNodes{
         return spriteNode
     }
 
-    
+    // MARK: - Lesser Antilles Arc (grouped quiz target)
+
+    func lesserAntillesArcToSKSpriteNode() -> SKSpriteNode {
+        // Invisible parent node positioned at origin — children keep their absolute positions
+        let spriteNode = SKSpriteNode()
+        spriteNode.position = CGPoint.zero
+        spriteNode.name = "Lesser Antilles"
+        // Physics body covers the island chain arc: center (242.8, 297.55), size ~15x27 with padding
+        spriteNode.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 15.0, height: 27.0), center: CGPoint(x: 242.8, y: 297.55))
+        spriteNode.physicsBody?.isDynamic = false
+        return spriteNode
+    }
+
+    // MARK: - Lesser Antilles island nodes (no physics body — tap hits the arc parent)
+
+    func guadeloupeBezierPathToSKSpriteNode(bpGuadeloupe: UIBezierPath) -> SKSpriteNode {
+        let position = CGPoint(x: 242.05, y: 303.41)
+        let name = "Guadeloupe"
+        let spriteNode = createMapNode(from: bpGuadeloupe, position: position, name: name, lineWidth: 0.25)
+        spriteNode.physicsBody = nil
+        return spriteNode
+    }
+
+    func martiniqueBezierPathToSKSpriteNode(bpMartinique: UIBezierPath) -> SKSpriteNode {
+        let position = CGPoint(x: 242.97, y: 299.37)
+        let name = "Martinique"
+        let spriteNode = createMapNode(from: bpMartinique, position: position, name: name, lineWidth: 0.5)
+        spriteNode.physicsBody = nil
+        return spriteNode
+    }
+
+    func trinidadAndTobagoBezierPathToSKSpriteNode(bpTrinidadAndTobago: UIBezierPath) -> SKSpriteNode {
+        let position = CGPoint(x: 241.6, y: 288.3)
+        let name = "Trinidad and Tobago"
+        let spriteNode = createMapNode(from: bpTrinidadAndTobago, position: position, name: name, lineWidth: 0.5)
+        spriteNode.physicsBody = nil
+        return spriteNode
+    }
+
+    func barbadosBezierPathToSKSpriteNode(bpBarbados: UIBezierPath) -> SKSpriteNode {
+        let position = CGPoint(x: 246.2, y: 295.2)
+        let name = "Barbados"
+        let spriteNode = createMapNode(from: bpBarbados, position: position, name: name, lineWidth: 0.5)
+        spriteNode.physicsBody = nil
+        return spriteNode
+    }
+
+    func saintLuciaBezierPathToSKSpriteNode(bpSaintLucia: UIBezierPath) -> SKSpriteNode {
+        let position = CGPoint(x: 242.8, y: 297.2)
+        let name = "Saint Lucia"
+        let spriteNode = createMapNode(from: bpSaintLucia, position: position, name: name, lineWidth: 0.5)
+        spriteNode.physicsBody = nil
+        return spriteNode
+    }
+
+    func grenadaBezierPathToSKSpriteNode(bpGrenada: UIBezierPath) -> SKSpriteNode {
+        let position = CGPoint(x: 240.7, y: 292.3)
+        let name = "Grenada"
+        let spriteNode = createMapNode(from: bpGrenada, position: position, name: name, lineWidth: 0.5)
+        spriteNode.physicsBody = nil
+        return spriteNode
+    }
+
+    func saintVincentBezierPathToSKSpriteNode(bpSaintVincent: UIBezierPath) -> SKSpriteNode {
+        let position = CGPoint(x: 242.1, y: 295.5)
+        let name = "Saint Vincent and the Grenadines"
+        let spriteNode = createMapNode(from: bpSaintVincent, position: position, name: name, lineWidth: 0.5)
+        spriteNode.physicsBody = nil
+        return spriteNode
+    }
+
+    func antiguaAndBarbudaBezierPathToSKSpriteNode(bpAntiguaAndBarbuda: UIBezierPath) -> SKSpriteNode {
+        let position = CGPoint(x: 241.6, y: 306.8)
+        let name = "Antigua and Barbuda"
+        let spriteNode = createMapNode(from: bpAntiguaAndBarbuda, position: position, name: name, lineWidth: 0.5)
+        spriteNode.physicsBody = nil
+        return spriteNode
+    }
+
+    func dominicaIslandBezierPathToSKSpriteNode(bpDominica: UIBezierPath) -> SKSpriteNode {
+        let position = CGPoint(x: 242.3, y: 301.4)
+        let name = "Dominica"
+        let spriteNode = createMapNode(from: bpDominica, position: position, name: name, lineWidth: 0.5)
+        spriteNode.physicsBody = nil
+        return spriteNode
+    }
+
+    func saintKittsAndNevisBezierPathToSKSpriteNode(bpSaintKittsAndNevis: UIBezierPath) -> SKSpriteNode {
+        let position = CGPoint(x: 239.4, y: 306.5)
+        let name = "Saint Kitts and Nevis"
+        let spriteNode = createMapNode(from: bpSaintKittsAndNevis, position: position, name: name, lineWidth: 0.5)
+        spriteNode.physicsBody = nil
+        return spriteNode
+    }
+
+
 }

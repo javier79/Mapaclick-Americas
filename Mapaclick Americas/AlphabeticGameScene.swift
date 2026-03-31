@@ -65,7 +65,7 @@ class AlphabeticGameScene: SKScene{
 
     /** Array contains country names in alphabetical order, matching the node names in InitSetMapNodes.
      Used to display the country name the player must find.*/
-    var countries_names_array = ["Argentina", "Belize", "Bolivia", "Brazil", "Canada", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominican Republic", "Ecuador", "El Salvador", "French Guiana", "Greenland", "Guatemala", "Guyana", "Haiti", "Honduras", "Jamaica", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Puerto Rico", "Suriname", "The Bahamas", "United States", "Uruguay", "Venezuela"]
+    var countries_names_array = ["Argentina", "Belize", "Bolivia", "Brazil", "Canada", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominican Republic", "Ecuador", "El Salvador", "French Guiana", "Greenland", "Guatemala", "Guyana", "Haiti", "Honduras", "Jamaica", "Lesser Antilles", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Puerto Rico", "Suriname", "The Bahamas", "United States", "Uruguay", "Venezuela"]
     
     //var touchedNode: SKPhysicsBody!//holds touched node, declared at the top to be accesed by accesory functions out of Touch function
     var fail: Bool!//flow control var allow when true for penalty to be added at timer funtion. Used on more than one funtion
@@ -1636,10 +1636,17 @@ class AlphabeticGameScene: SKScene{
     
     //paint nodes green also sets physics body to nil
     func paintNode(spriteNode:SKSpriteNode){
+        let greenColor = UIColor.init(red: 0, green: 1, blue: 0.949, alpha: 1.0)
         spriteNode.colorBlendFactor = 0.8
-        spriteNode.color = UIColor.init(red: 0, green: 1, blue: 0.949, alpha: 1.0)//(red: 0, green: 1, blue: 1, alpha: 1.0)//(red: 0.098, green: 1, blue: 1, alpha: 1.0)//UIColor.init(red: 0, green: 1, blue: 0.949, alpha: 1.0)//UIColor.init(red: 0, green: 1, blue: 0.949, alpha: 1.0)//(red: 0, green: 1, blue: 0.9137, alpha: 1.0)//UIColor.init(red: 0.0314, green: 1, blue: 0.7843, alpha: 1.0)//UIColor.init(red: 0.5686, green: 1, blue: 0.8745, alpha: 1.0)
-        //spriteNode.colorBlendFactor = 0.8
+        spriteNode.color = greenColor
         //spriteNode.physicsBody = nil
+        // If the node has children (e.g. Lesser Antilles Arc), color them all green too
+        for child in spriteNode.children {
+            if let childSprite = child as? SKSpriteNode {
+                childSprite.colorBlendFactor = 0.8
+                childSprite.color = greenColor
+            }
+        }
     }
     
     //following function sets labels for country names using one or two labels and adds labels to map node(country map node)
@@ -1810,6 +1817,10 @@ class AlphabeticGameScene: SKScene{
 
            case "The Bahamas":
                addTheBahamasLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Lesser Antilles":
+               addLesserAntillesLeaderLineLabel(to: nodeSprite)
                return
 
            default:
@@ -2265,6 +2276,39 @@ class AlphabeticGameScene: SKScene{
 
         nodeSprite.addChild(line)
         nodeSprite.addChild(label)
+    }
+
+    // Lesser Antilles: leader line pointing right from the island chain
+    func addLesserAntillesLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let firstLineLabel = SKLabelNode()
+        firstLineLabel.text = "Lesser"
+        firstLineLabel.fontName = "ArialMT"
+        firstLineLabel.fontColor = UIColor.black
+        firstLineLabel.fontSize = 5.0
+        firstLineLabel.horizontalAlignmentMode = .left
+        firstLineLabel.verticalAlignmentMode = .center
+        // Arc node is at (0,0), islands are around (242.8, 297.55) — position label up-right to avoid Guyana overlap
+        firstLineLabel.position = CGPoint(x: 260.0, y: 306.0)
+
+        let secondLineLabel = SKLabelNode()
+        secondLineLabel.text = "Antilles"
+        secondLineLabel.fontName = "ArialMT"
+        secondLineLabel.fontColor = UIColor.black
+        secondLineLabel.fontSize = 5.0
+        secondLineLabel.horizontalAlignmentMode = .left
+        secondLineLabel.verticalAlignmentMode = .center
+        secondLineLabel.position = CGPoint(x: 260.0, y: 300.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 247.0, y: 297.0))
+        path.addLine(to: CGPoint(x: 259.0, y: 303.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(firstLineLabel)
+        nodeSprite.addChild(secondLineLabel)
     }
 
     //sets attributes for label to use with one word country names

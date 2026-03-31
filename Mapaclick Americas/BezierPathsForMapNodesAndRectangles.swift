@@ -10554,6 +10554,33 @@ class BezierPathsForMapNodesAndRectangles{
        return pathDOM
    }
 
+   func guadeloupeDrawBezierPath() -> UIBezierPath{//Guadeloupe
+       let pathGUA = UIBezierPath()
+       pathGUA.move(to: CGPoint(x: -0.05, y: 0.35))
+       pathGUA.addCurve(to: CGPoint(x: -0.62, y: -0.21), controlPoint1: CGPoint(x: -0.16, y: 0.17), controlPoint2: CGPoint(x: -0.34, y: -1.00))
+       pathGUA.addCurve(to: CGPoint(x: -0.05, y: 0.35), controlPoint1: CGPoint(x: -0.79, y: 0.24), controlPoint2: CGPoint(x: -0.53, y: 0.68))
+       pathGUA.move(to: CGPoint(x: -0.05, y: 0.40))
+       pathGUA.addCurve(to: CGPoint(x: 0.27, y: 1.00), controlPoint1: CGPoint(x: 0.15, y: 0.58), controlPoint2: CGPoint(x: -0.06, y: 0.94))
+       pathGUA.addCurve(to: CGPoint(x: 0.79, y: 0.35), controlPoint1: CGPoint(x: 0.31, y: 0.70), controlPoint2: CGPoint(x: 0.55, y: 0.49))
+       pathGUA.addCurve(to: CGPoint(x: -0.05, y: 0.40), controlPoint1: CGPoint(x: 0.57, y: 0.28), controlPoint2: CGPoint(x: 0.07, y: 0.05))
+       pathGUA.move(to: CGPoint(x: 0.54, y: -0.73))
+       pathGUA.addCurve(to: CGPoint(x: 0.66, y: -0.43), controlPoint1: CGPoint(x: 0.35, y: -0.53), controlPoint2: CGPoint(x: 0.39, y: -0.43))
+       pathGUA.addCurve(to: CGPoint(x: 0.54, y: -0.73), controlPoint1: CGPoint(x: 0.70, y: -0.56), controlPoint2: CGPoint(x: 0.66, y: -0.66))
+       pathGUA.close()
+       return pathGUA
+   }
+
+   func martiniqueDrawBezierPath() -> UIBezierPath{//Martinique
+       let pathMAR = UIBezierPath()
+       pathMAR.move(to: CGPoint(x: 0.25, y: -0.75))
+       pathMAR.addCurve(to: CGPoint(x: -0.25, y: -0.44), controlPoint1: CGPoint(x: 0.06, y: -0.47), controlPoint2: CGPoint(x: -0.16, y: -0.71))
+       pathMAR.addCurve(to: CGPoint(x: -0.47, y: 0.39), controlPoint1: CGPoint(x: -0.34, y: -0.18), controlPoint2: CGPoint(x: -0.47, y: 0.11))
+       pathMAR.addCurve(to: CGPoint(x: 0.00, y: 0.31), controlPoint1: CGPoint(x: -0.47, y: 0.75), controlPoint2: CGPoint(x: -0.09, y: 0.43))
+       pathMAR.addCurve(to: CGPoint(x: 0.25, y: -0.75), controlPoint1: CGPoint(x: 0.20, y: 0.06), controlPoint2: CGPoint(x: 0.47, y: -0.45))
+       pathMAR.close()
+       return pathMAR
+   }
+
    func saintKittsAndNevisDrawBezierPath() -> UIBezierPath{//Saint Kitts and Nevis
        let pathSAI = UIBezierPath()
        pathSAI.move(to: CGPoint(x: 0.12, y: -0.12))
