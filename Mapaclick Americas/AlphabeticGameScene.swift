@@ -93,6 +93,7 @@ class AlphabeticGameScene: SKScene{
     var baseMapScale: CGFloat = 1.0       // The default/minimum scale the map starts at (can't zoom out past this)
     var baseMapPosition: CGPoint = .zero  // The default position the map snaps back to when zoomed out to baseMapScale
     var maxZoomScale: CGFloat = 3.0       // The maximum zoom-in limit, computed as baseMapScale * 3.0
+    var countriesNameBGScale: CGFloat = 1.10  // Scale for countriesNameBackground — set by device function, applied after resizeCountryNameBackground()
     
     var isAdShowing: Bool = false//Ads Logic
     
@@ -172,11 +173,14 @@ class AlphabeticGameScene: SKScene{
 
         // Remove texture so .size controls dimensions directly
         mapRectangleBackground.texture = nil
-        mapRectangleBackground.color = UIColor.init(red: 0.2588, green: 0.7608, blue: 1.0, alpha: 1.0)
+        mapRectangleBackground.color = UIColor.yellow//init(red: 0.2588, green: 0.7608, blue: 1.0, alpha: 1.0)
         mapRectangleBackground.colorBlendFactor = 1.0
         mapRectangleBackground.xScale = 1.0
         mapRectangleBackground.yScale = 1.0
-        mapRectangleBackground.size = CGSize(width: mapRectangleGestureMGMT.size.width + 8, height: mapRectangleGestureMGMT.size.height + 14)
+        debugPrint("mapRectangleGestureMGMT.size: \(mapRectangleGestureMGMT.size), mapRectangleBackground.size before: \(mapRectangleBackground.size)")
+        //mapRectangleBackground.size = CGSize(width: mapRectangleGestureMGMT.size.width + 8, height: mapRectangleGestureMGMT.size.height + 14)
+        // Sized so the gesture node's yellow stroke shows as a visible border around the background
+        mapRectangleBackground.size = CGSize(width: 385.0, height: 575.0)
         mapRectangleBackground.position = CGPoint.zero
         mapRectangleBackground.name = "mapRectangleBackground"
         
@@ -362,33 +366,77 @@ class AlphabeticGameScene: SKScene{
     //Execute attributes for scaling and positioning based on device screen size
     func setScaleAndIndepRenderingPositioningForIpadsMediumScreenSizes(){
         debugPrint("iPad Air 11inch(M2 18.6), iPad Air 11inch(M3 18.6), iPad Pro 11inch(1st-4th gen 18.6), iPad 11 inch(M4 18.6), iPad Air(3rd gen 18.6), iPad Air(4th-5th gen 18.6), iPad(7th-9th gen 18.6), Ipad 10th Gen(18.6), iPad A16(11 Gen 18.6), iPad Pro 10.5 enters scaling and positioning function")
-        mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00/*1.8*/)
-        //mapRectangleGestureMGMT.setScale(1.90)//1.38
-        mapRectangleGestureMGMT.setScale(2.1)//1.85
-        
-        timerBackgroundTwo.setScale(2.1)
-        timerBackgroundTwo.position = CGPoint(x:self.size.width / 2/*333.5*/, y:self.size.height / 9)/**parent to labelTimer*/
-        
-        //labelScores.position = CGPoint(x:440/*300*/, y:-7)
-        //labelScores.fontSize = 22.5
-        
-        //controlPanelSKSpriteNode.size = CGSize(width:self.size.width - 1, height:70)
-        //controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 20.5) //14.8)
-        controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 22.5)
-        //controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 4.5) //14.8)
-        controlPanelSKSpriteNode.setScale(1.5)
-        
-        skipButton.setScale(1.3)
-        //skipButton.position = CGPoint(x:320, y:-0.5)
-        exitRedButton.setScale(1.3)
-        //exitRedButton.position = CGPoint(x:-370, y:-0.5)
-        
-        //timerBackgroundTwo.setScale(1.85)
-        
-        countriesNameBackground.setScale(1.4)
-        countriesNameBackground.position = CGPoint(x:0.5/*goldenBackground().size.width/200*/, y:2.0/*goldenBackground().size.height/2 * 0.18*/)
+
+        // Dynamic map positioning — same approach as iPhone function
+        let mapWidth: CGFloat = 390.0
+        let mapHeight: CGFloat = 580.0
+        let topMargin: CGFloat = 50.0
+        let bottomMargin: CGFloat = 20.0  // clears home indicator zone on modern iPads
+        let horizontalMargin: CGFloat = 36.0
+        let gap: CGFloat = 4.0  // tiny gap between stacked elements
+
+        // Control panel sizing — lifted above home indicator
+        let panelHeight: CGFloat = 70.0
+        controlPanelSKSpriteNode.size = CGSize(width: self.size.width - (horizontalMargin * 2), height: panelHeight)
+        controlPanelSKSpriteNode.position = CGPoint(x: self.size.width / 2, y: bottomMargin + (panelHeight / 2))  // 20 + 35 = 55
+        let controlPanelTopY = controlPanelSKSpriteNode.position.y + (controlPanelSKSpriteNode.size.height / 2)  // = 70
+
+        // Timer sits just above control panel with a gap
+        timerBackgroundTwo.setScale(2.00)
+        let timerHalfHeight: CGFloat = (17.0 * 2.00) / 2.0  // base height 17 × scale 2.0, halved
+        let timerCenterY = controlPanelTopY + gap + timerHalfHeight - 2.5  // sits on top of panel, lowered 2.5pt
+        timerBackgroundTwo.position = CGPoint(x: self.size.width / 2, y: timerCenterY)
+        let timerTopY = timerCenterY + timerHalfHeight
+
+        // Golden rectangle sits just above timer with a gap
+        let mapBottomY = timerTopY + gap
+        let availableWidth = self.size.width - (horizontalMargin * 2)
+        let availableHeight = self.size.height - mapBottomY - topMargin
+        let scaleX = availableWidth / mapWidth
+        let scaleY = availableHeight / mapHeight
+        let mapScale = min(scaleX, scaleY)
+        let centerX = self.size.width / 2
+        let centerY = mapBottomY + (mapScale * mapHeight / 2) + 2.0  // position so bottom edge aligns, nudged 2.0pt up
+        mapRectangleGestureMGMT.position = CGPoint(x: centerX, y: centerY)
+        mapRectangleGestureMGMT.setScale(mapScale)
+
+        baseMapScale = mapScale
+        baseMapPosition = CGPoint(x: centerX, y: centerY)
+        maxZoomScale = mapScale * 5.0
+
+        let goldenRectWidth = mapRectangleGestureMGMT.size.width
+        debugPrint("iPad Medium — goldenRectWidth: \(goldenRectWidth), mapScale: \(mapScale), gestureNode.size: \(mapRectangleGestureMGMT.size)")
+        // Resize control panel width to match golden rect
+        controlPanelSKSpriteNode.size = CGSize(width: goldenRectWidth, height: 70)
+
+        exitRedButton.setScale(1.90)  // was 1.60 — slightly larger for taller panel
+        exitRedButton.position = CGPoint(x: -230, y: 0)
+
+        skipButton.setScale(1.90)  // was 1.60 — matches exit button
+        skipButton.position = CGPoint(x: 230, y: 0)
+
+        countriesNameBGScale = 1.50  // restored original
+        countriesNameBackground.position = CGPoint(x: 0, y: 0)
+
+        labelScores.fontSize = 24  // scaled up for iPad
+        // Place above Saltar button (skipButton is at x: +230 relative to controlPanel center)
+        let skipButtonX = controlPanelSKSpriteNode.position.x + 230
+        labelScores.position = CGPoint(x: skipButtonX, y: timerCenterY - 11)
+        labelScores.zPosition = 1
+        if labelScores.parent == nil {
+            self.addChild(labelScores)
+        }
+
+        // Cover Hawaii islands with a blue rectangle matching the scene background
+        let hawaiiCover = SKSpriteNode(color: UIColor(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0), size: CGSize(width: 50, height: 40))
+        hawaiiCover.position = CGPoint(x: 33, y: centerY + 35)  // approximate Hawaii location on left edge
+        hawaiiCover.zPosition = 2  // above the map
+        hawaiiCover.name = "hawaiiCover"
+        if self.childNode(withName: "hawaiiCover") == nil {
+            self.addChild(hawaiiCover)
+        }
     }
-    
+
     //Execute attributes for scaling and positioning based on device screen size
     /*func setScaleAndIndepRenderingPositioningForIpadsMediumScreenSizes(){
         //debugPrint("Set StartScene gamePlay objts scaling and positioning for: iPad Pro 10.5, Pro11(1gen), Air(3gen), 7Gen, Pro11(2gen), 8Gen, 9Gen, Air(4gen), PRO11(3gen), Air(5gen), 10Gen, Pro11(4gen) entering iPad Medium size scaling and positioning func")
@@ -2440,12 +2488,16 @@ class AlphabeticGameScene: SKScene{
     /// Dynamically resizes countriesNameBackground to fit the current countryNameLabel text with rounded corners and border.
     /// Auto-shrinks the font if the name is too long to fit between the Salir/Saltar buttons.
     func resizeCountryNameBackground(){
-        let horizontalPadding: CGFloat = 36.0
-        let bgHeight: CGFloat = 30.0
+        // Reset scale before measuring so frame calculations are accurate
+        countriesNameBackground.setScale(1.0)
+        // Scale dimensions for iPad: keep padding tight, allow wider box for long names
+        let scaleFactor = countriesNameBGScale / 1.10
+        let horizontalPadding: CGFloat = 36.0  // No scaling — keeps short names proportional
+        let bgHeight: CGFloat = 20.0 * scaleFactor
         let bgScale: CGFloat = 1.10
-        // Buttons are at x:±110, each 50pt base * 1.30 scale = 65pt wide, inner edges at ±77.5
-        // Max visual width with 8pt gap on each side: 155 - 16 = 139pt
-        let maxVisualWidth: CGFloat = 139.0
+        // iPad buttons at ±195 give much more space than iPhone ±110
+        // Scale maxVisualWidth generously so long names (Dominican Republic) fit
+        let maxVisualWidth: CGFloat = 139.0 * scaleFactor * 1.4
         let maxUnscaledWidth: CGFloat = maxVisualWidth / bgScale
         let minFontSize: CGFloat = 12.0
 
@@ -2473,6 +2525,7 @@ class AlphabeticGameScene: SKScene{
         if let texture = textureView.texture(from: shapeNode) {
             countriesNameBackground.texture = texture
             countriesNameBackground.size = texture.size()
+            countriesNameBackground.setScale(countriesNameBGScale)
         }
     }
 
