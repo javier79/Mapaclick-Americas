@@ -149,23 +149,12 @@ class AlphabeticGameScene: SKScene{
         //The following block reads device screen size in points, based on screen size a function will execute to asign scaling and positioning attributes
         /*iPhone 17 devices run on IOS 26 which currently is available for xcode 26, i included devices 17, 17 PRO and 17 ProMAX according to screen size but have not been tested as this simulator are not available for the current xcode running. iPhone 17 Air is not included here as its screen size is new(1260, 2736) and have no means to test it here*/
         debugPrint("Screen size: \(screenSize)")
-        switch (screenSize.width, screenSize.height) {
-            
-            case (2048.0, 2732.0):
-                 debugPrint("Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5), iPad Air 13inch(6th gen M2, M3)")
-                 setScaleAndIndepRenderingPositioningForIpadsLargeScreenSizes()
-           
-            case (1536.0, 2048.0),(1488.0, 2266.0) :
-                 debugPrint("iPad 6Gen, iPad Mini(5gen 18.6), iPad Mini(6gen 18.6), iPad Mini(A17Pro 18.6)")
-                 setScaleAndIndepRenderingPositioningForIpadsSmallScreenSizes()
-            
-        case (1668.0, 2224.0), (1668.0, 2388.0), (1620.0, 2160.0),(1640.0, 2360.0), (1668.0, 2420.0):
-                debugPrint("iPad Air 11inch(M2 18.6), iPad Air 11inch(M3 18.6), iPad Pro 11inch(1st-4th gen 18.6), iPad Pro 11 inch(M4 18.6), iPad Air(3rd gen 18.6), iPad Air(4th-5th gen 18.6), iPad(7th-9th gen 18.6), Ipad 10th Gen(18.6), iPad A16(11 Gen 18.6), iPad Pro 10.5")
-                setScaleAndIndepRenderingPositioningForIpadsMediumScreenSizes()
-            
-            default:
-                debugPrint("All iPhones — universal rendering via fixed scene size (375x667)")
-                setScaleAndIndepRenderingPositioningForAllIphones()
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            debugPrint("iPad detected — universal dynamic rendering")
+            setScaleAndIndepRenderingPositioningForAllIpads()
+        } else {
+            debugPrint("All iPhones — universal rendering via fixed scene size (375x667)")
+            setScaleAndIndepRenderingPositioningForAllIphones()
         }
 
         // Override map positioning for the new Americas portrait map
@@ -304,67 +293,67 @@ class AlphabeticGameScene: SKScene{
         countriesNameBackground.setScale(1.9)
     }*/
     
-    func setScaleAndIndepRenderingPositioningForIpadsLargeScreenSizes(){
+    /*func setScaleAndIndepRenderingPositioningForIpadsLargeScreenSizes(){
         debugPrint("Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5), iPad Air 13inch(6th gen M2, M3) enters scaling and positioning function")
         mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00/*2.00*/)
         //mapRectangleGestureMGMT.setScale(1.90)//1.38
         mapRectangleGestureMGMT.setScale(2.4)//1.38
-        
+
         timerBackgroundTwo.setScale(2.4)
         timerBackgroundTwo.position = CGPoint(x:self.size.width / 2/*333.5*/, y:self.size.height / 9.6)/**parent to labelTimer*/
-        
+
         //labelScores.position = CGPoint(x:440/*300*/, y:-7)
         //labelScores.fontSize = 25.5
-        
+
         //controlPanelSKSpriteNode.size = CGSize(width:self.size.width - 1, height:70)
         //controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 20.5) //14.8)
         controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 24.5)
         //controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 4.5) //14.8)
         controlPanelSKSpriteNode.setScale(1.8)
-        
+
         skipButton.setScale(1.35)
         //skipButton.position = CGPoint(x:320, y:-0.5)
         exitRedButton.setScale(1.35)
         //exitRedButton.position = CGPoint(x:-370, y:-0.5)
-        
+
         //timerBackgroundTwo.setScale(1.9)
-        
+
         countriesNameBackground.setScale(1.3)
         countriesNameBackground.position = CGPoint(x:0.5/*goldenBackground().size.width/200*/, y:2.0/*goldenBackground().size.height/2 * 0.18*/)
-    }
+    }*/
     
     //Execute attributes for scaling and positioning based on device screen size
-    func setScaleAndIndepRenderingPositioningForIpadsSmallScreenSizes(){
+    /*func setScaleAndIndepRenderingPositioningForIpadsSmallScreenSizes(){
         debugPrint("iPad 6Gen, iPad Mini(5gen 18.6), iPad Mini(6gen 18.6), iPad Mini(A17Pro 18.6) enters scaling and positioning function")
         mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00/*1.8*/)
         //mapRectangleGestureMGMT.setScale(1.90)//1.38
         mapRectangleGestureMGMT.setScale(1.85)//1.38
-        
+
         timerBackgroundTwo.setScale(2.0)
         timerBackgroundTwo.position = CGPoint(x:self.size.width / 2/*333.5*/, y:self.size.height / 8.7 )/**parent to labelTimer*/
-        
+
         //labelScores.position = CGPoint(x:440/*300*/, y:-7)
         //labelScores.fontSize = 22.5
-        
+
         //controlPanelSKSpriteNode.size = CGSize(width:self.size.width - 1, height:64)
         //controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 20.5) //14.8)
         controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 22.5)
         //controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 4.5) //14.8)
         controlPanelSKSpriteNode.setScale(1.5)
-        
+
         skipButton.setScale(1.4)
         //skipButton.position = CGPoint(x:320, y:-0.5)
         exitRedButton.setScale(1.4)
         //exitRedButton.position = CGPoint(x:-370, y:-0.5)
-        
+
         //timerBackgroundTwo.setScale(1.85)
-        
+
         countriesNameBackground.setScale(1.4)
         countriesNameBackground.position = CGPoint(x:0.5/*goldenBackground().size.width/200*/, y:2.0/*goldenBackground().size.height/2 * 0.18*/)
-    }
+    }*/
     
     //Execute attributes for scaling and positioning based on device screen size
-    func setScaleAndIndepRenderingPositioningForIpadsMediumScreenSizes(){
+    func setScaleAndIndepRenderingPositioningForAllIpads(){
         debugPrint("iPad Air 11inch(M2 18.6), iPad Air 11inch(M3 18.6), iPad Pro 11inch(1st-4th gen 18.6), iPad 11 inch(M4 18.6), iPad Air(3rd gen 18.6), iPad Air(4th-5th gen 18.6), iPad(7th-9th gen 18.6), Ipad 10th Gen(18.6), iPad A16(11 Gen 18.6), iPad Pro 10.5 enters scaling and positioning function")
 
         // Dynamic map positioning — same approach as iPhone function
@@ -428,8 +417,12 @@ class AlphabeticGameScene: SKScene{
         }
 
         // Cover Hawaii islands with a blue rectangle matching the scene background
-        let hawaiiCover = SKSpriteNode(color: UIColor(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0), size: CGSize(width: 50, height: 40))
-        hawaiiCover.position = CGPoint(x: 33, y: centerY + 35)  // approximate Hawaii location on left edge
+        // Anchor to the left edge of the golden rect so cover doesn't overlap the golden border
+        let goldenRectLeftEdge = centerX - (goldenRectWidth / 2)
+        let coverWidth = goldenRectLeftEdge  // fills from screen left to golden rect edge
+        let hawaiiCover = SKSpriteNode(color: UIColor(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0), size: CGSize(width: coverWidth, height: 55 * mapScale))
+        hawaiiCover.anchorPoint = CGPoint(x: 0, y: 0.5)  // anchor at left edge
+        hawaiiCover.position = CGPoint(x: 0, y: centerY + (30 * mapScale))  // starts at screen left
         hawaiiCover.zPosition = 2  // above the map
         hawaiiCover.name = "hawaiiCover"
         if self.childNode(withName: "hawaiiCover") == nil {
@@ -438,7 +431,7 @@ class AlphabeticGameScene: SKScene{
     }
 
     //Execute attributes for scaling and positioning based on device screen size
-    /*func setScaleAndIndepRenderingPositioningForIpadsMediumScreenSizes(){
+    /*func setScaleAndIndepRenderingPositioningForAllIpads(){
         //debugPrint("Set StartScene gamePlay objts scaling and positioning for: iPad Pro 10.5, Pro11(1gen), Air(3gen), 7Gen, Pro11(2gen), 8Gen, 9Gen, Air(4gen), PRO11(3gen), Air(5gen), 10Gen, Pro11(4gen) entering iPad Medium size scaling and positioning func")
         //debugPrint("Ipads Medium Screen Sizes")
         mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00/*1.8*/)
@@ -519,6 +512,18 @@ class AlphabeticGameScene: SKScene{
         labelScores.position = CGPoint(x: self.size.width - 60, y: timerCenterY - 7)
         labelScores.zPosition = 1
         self.addChild(labelScores)
+
+        // Cover Hawaii islands — only visible on smallest iPhones (750x1334)
+        let goldenRectLeftEdge = centerX - (mapRectangleGestureMGMT.size.width / 2)
+        let coverWidth = goldenRectLeftEdge
+        let hawaiiCover = SKSpriteNode(color: UIColor(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0), size: CGSize(width: coverWidth, height: 55 * mapScale))
+        hawaiiCover.anchorPoint = CGPoint(x: 0, y: 0.5)
+        hawaiiCover.position = CGPoint(x: 0, y: centerY + (30 * mapScale))
+        hawaiiCover.zPosition = 2
+        hawaiiCover.name = "hawaiiCover"
+        if self.childNode(withName: "hawaiiCover") == nil {
+            self.addChild(hawaiiCover)
+        }
     }
     //Execute attributes for scaling and positioning based on device screen size
     /*func setScaleAndIndepRenderingPositioningForMediumLargeScreenSizes(){
