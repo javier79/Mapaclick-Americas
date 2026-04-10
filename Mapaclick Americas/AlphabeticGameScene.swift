@@ -165,7 +165,7 @@ class AlphabeticGameScene: SKScene{
             
             default:
                 debugPrint("All iPhones — universal rendering via fixed scene size (375x667)")
-                setScaleAndIndepRenderingPositioningForSmallScreenSizes()
+                setScaleAndIndepRenderingPositioningForAllIphones()
         }
 
         // Override map positioning for the new Americas portrait map
@@ -467,7 +467,7 @@ class AlphabeticGameScene: SKScene{
         countriesNameBackground.setScale(1.75)
     }*/
     //Execute attributes for scaling and positioning based on device screen size
-    func setScaleAndIndepRenderingPositioningForSmallScreenSizes(){
+    func setScaleAndIndepRenderingPositioningForAllIphones(){
         debugPrint("Default Settings and iPhoneSE(second gen 18.5), iPhoneSE(third gen 18.5), 8, iPhone 12 mini(18.5), iPhone 13 mini(18.5), iPhone X, iPhone XS(18.5) ,iPhone 11 PRO(18.5) enter scaling and positioning func")
         
         // Portrait Americas map positioning for small screens
@@ -515,7 +515,7 @@ class AlphabeticGameScene: SKScene{
 
         // Move labelScores to far right at same height as timer (reparent from controlPanel to self)
         //labelScores.removeFromParent()
-        labelScores.fontSize = 14
+        labelScores.fontSize = 17
         labelScores.position = CGPoint(x: self.size.width - 60, y: timerCenterY - 7)
         labelScores.zPosition = 1
         self.addChild(labelScores)
@@ -538,24 +538,24 @@ class AlphabeticGameScene: SKScene{
         countriesNameBackground.setScale(1.20)
     }*/
     
-    func setScaleAndIndepRenderingPositioningForMediumLargeScreenSizesTwo(){
+    /*func setScaleAndIndepRenderingPositioningForMediumLargeScreenSizesTwo(){
         debugPrint("iPhone 8plus, iPhone XR(18.5), iPhone 11(18.5), iPhoneXS Max(18.5), iPhone 11 ProMax(18.5) enters scaling and positioning func")
         //debugPrint("iPhone medium-large screen sizes")
         mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.716/*1.8*/)
         mapRectangleGestureMGMT.setScale(1.45)//1.33
-        
+
         timerBackgroundTwo.setScale(1.40)
         timerBackgroundTwo.position = CGPoint(x:self.size.width / 2/*333.5*/, y:self.size.height / 5.8)/**parent to labelTimer*/
-        
+
         controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 14.0) //13.5)
         controlPanelSKSpriteNode.setScale(1.25)
-        
+
         skipButton.setScale(1.35)
         exitRedButton.setScale(1.35)
         //ATTENTION OF ALL THE BACKGROUNDS FOR COUNTRY NAMES THE ONLY ONE THAT DOES NOT HAVE AN SCALING PROPERTY OUT SIDE THIS FUNCTION IS "countriesNameBackground", but is set here.
         countriesNameBackground.setScale(1.35)
         countriesNameBackground.position = CGPoint(x:0.5/*goldenBackground().size.width/200*/, y:2.0/*goldenBackground().size.height/2 * 0.18*/)
-    }
+    }*/
     
     //Execute attributes for scaling and positioning based on device screen size
     /*func setScaleAndIndepRenderingPositioningForLargeScreenSizes(){
@@ -576,85 +576,85 @@ class AlphabeticGameScene: SKScene{
         countriesNameBackground.setScale(1.20)
     }*/
     
-    func setScaleAndIndepRenderingPositioningForLargeScreenSizesTwo(){
+    /*func setScaleAndIndepRenderingPositioningForLargeScreenSizesTwo(){
         debugPrint("iPhone 12(18.5), iPhone 12Pro(18.5), iPhone 13(18.5), iPhone 13 Pro(18.5), iPhone 14(18.5), iPhone 14 Pro(18.5), iPhone 15(18.6), iPhone 15 Pro(18.6), iPhone 16(18.6), iPhone 16e enters scaling and positioning func")
         //debugPrint("Set StartScene gamePlay objts scaling and positioning for: iPhone 12, 12Pro, 13, 13Pro, 14, 14Pro enter LargeScreenSizes scaling and positioning func")
         //debugPrint("iPhone large screen sizes")
         mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.67/*1.8*/)
         mapRectangleGestureMGMT.setScale(1.37)//1.38
-        
+
         timerBackgroundTwo.setScale(1.40)
         timerBackgroundTwo.position = CGPoint(x:self.size.width / 2/*333.5*/, y:self.size.height / 5.4)/**parent to labelTimer*/
-        
+
         controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 13.3) //14.8)
         controlPanelSKSpriteNode.setScale(1.25)
-        
+
         skipButton.setScale(1.35)
         exitRedButton.setScale(1.35)
         //ATTENTION OF ALL THE BACKGROUNDS FOR COUNTRY NAMES THE ONLY ONE THAT DOES NOT HAVE AN SCALING PROPERTY OUT SIDE THIS FUNCTION IS "countriesNameBackground", but is set here. The others are set to 1.20
         //(continue)on the functions that change backgrounds according to the country name string length.
         countriesNameBackground.setScale(1.35)
         countriesNameBackground.position = CGPoint(x:0.5/*goldenBackground().size.width/200*/, y:2.0/*goldenBackground().size.height/2 * 0.18*/)
-    }
+    }*/
     
     //Execute attributes for scaling and positioning based on device screen size
-    func setScaleAndIndepRenderingPositioningForXtraLargeScreenSizes(){
+    /*func setScaleAndIndepRenderingPositioningForXtraLargeScreenSizes(){
         debugPrint("iPhone 12ProMax, iPhone 13 Pro Max, iPhone 14 plus, iPhone 14 ProMax, iPhone 15 plus, iPhone 15 ProMax, iPhone 16 Plus enters scaling and positioning func")
         mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.72/*1.8*/)
         mapRectangleGestureMGMT.setScale(1.5)//1.38
-        
+
         timerBackgroundTwo.setScale(1.5)
         timerBackgroundTwo.position = CGPoint(x:self.size.width / 2/*333.5*/, y:self.size.height / 5.85)/**parent to labelTimer*/
-        
+
         controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 14.5) //14.8)
         controlPanelSKSpriteNode.setScale(1.25)
-        
+
         skipButton.setScale(1.35)
         exitRedButton.setScale(1.35)
-        
+
         countriesNameBackground.setScale(1.35)
         countriesNameBackground.position = CGPoint(x:0.5/*goldenBackground().size.width/200*/, y:2.0/*goldenBackground().size.height/2 * 0.18*/)
-    }
+    }*/
     
-    func setScaleAndIndepRenderingPositioningForiPhone16Pro(){
+    /*func setScaleAndIndepRenderingPositioningForiPhone16Pro(){
         debugPrint("iPhone 16 PRO(18.6), iPhone 17, iPhone 17 PRO enters scaling and positioning func")
-        
+
         mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.72/*1.8*/)
         mapRectangleGestureMGMT.setScale(1.37)//1.38
-        
+
         timerBackgroundTwo.setScale(1.40)
         timerBackgroundTwo.position = CGPoint(x:self.size.width / 2/*333.5*/, y:self.size.height / 5.55)/**parent to labelTimer*/
-        
+
         controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 13.5) //13.3)
         controlPanelSKSpriteNode.setScale(1.25)
-        
+
         skipButton.setScale(1.35)
         exitRedButton.setScale(1.35)
         //ATTENTION OF ALL THE BACKGROUNDS FOR COUNTRY NAMES THE ONLY ONE THAT DOES NOT HAVE AN SCALING PROPERTY OUT SIDE THIS FUNCTION IS "countriesNameBackground", but is set here. The others are set to 1.20
         //(continue)on the functions that change backgrounds according to the country name string length.
         countriesNameBackground.setScale(1.35)
         countriesNameBackground.position = CGPoint(x:0.5/*goldenBackground().size.width/200*/, y:2.0/*goldenBackground().size.height/2 * 0.18*/)
-    }
+    }*/
     
-    func setScaleAndIndepRenderingPositioningForiPhone16ProMax(){
+    /*func setScaleAndIndepRenderingPositioningForiPhone16ProMax(){
         debugPrint("iPhone 16 PROMAX, iPhone 17 ProMax  enters scaling and positioning func")
         mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.765/*1.8*/)
         mapRectangleGestureMGMT.setScale(1.5)//1.38
-        
+
         timerBackgroundTwo.setScale(1.5)
         timerBackgroundTwo.position = CGPoint(x:self.size.width / 2/*333.5*/, y:self.size.height / 5.98)/**parent to labelTimer*/
-        
+
         controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 14.7) //14.8)
         controlPanelSKSpriteNode.setScale(1.25)
-        
+
         skipButton.setScale(1.35)
         exitRedButton.setScale(1.35)
-        
+
         countriesNameBackground.setScale(1.35)
         countriesNameBackground.position = CGPoint(x:0.5/*goldenBackground().size.width/200*/, y:2.0/*goldenBackground().size.height/2 * 0.18*/)
-    }
+    }*/
 
-    /// Dynamically positions and scales the Americas map rectangle to fit within the portrait screen.
+    /*/// Dynamically positions and scales the Americas map rectangle to fit within the portrait screen.
     /// Called after device-specific functions to override map positioning for the new 390x580 portrait map.
     func positionMapForPortrait() {
         // Map rectangle dimensions from BezierPathsForMapNodesAndRectangles.createRectangle()
@@ -682,7 +682,7 @@ class AlphabeticGameScene: SKScene{
         mapRectangleGestureMGMT.setScale(mapScale)
 
         debugPrint("positionMapForPortrait: screen=\(self.size), scale=\(mapScale), center=(\(centerX), \(centerY))")
-    }
+    }*/
 
     /*@objc func handlePan(_ gesture: UIPanGestureRecognizer) {
         if isScaled == true {
@@ -2490,14 +2490,12 @@ class AlphabeticGameScene: SKScene{
     func resizeCountryNameBackground(){
         // Reset scale before measuring so frame calculations are accurate
         countriesNameBackground.setScale(1.0)
-        // Scale dimensions for iPad: keep padding tight, allow wider box for long names
-        let scaleFactor = countriesNameBGScale / 1.10
-        let horizontalPadding: CGFloat = 36.0  // No scaling — keeps short names proportional
-        let bgHeight: CGFloat = 20.0 * scaleFactor
+        let isIPad = countriesNameBGScale > 1.10
+        let horizontalPadding: CGFloat = 36.0
+        let bgHeight: CGFloat = isIPad ? 20.0 * (countriesNameBGScale / 1.10) : 30.0
         let bgScale: CGFloat = 1.10
-        // iPad buttons at ±195 give much more space than iPhone ±110
-        // Scale maxVisualWidth generously so long names (Dominican Republic) fit
-        let maxVisualWidth: CGFloat = 139.0 * scaleFactor * 1.4
+        // iPhone buttons at ±110, iPad buttons at ±230 — different max widths
+        let maxVisualWidth: CGFloat = isIPad ? 139.0 * (countriesNameBGScale / 1.10) * 1.4 : 139.0
         let maxUnscaledWidth: CGFloat = maxVisualWidth / bgScale
         let minFontSize: CGFloat = 12.0
 
