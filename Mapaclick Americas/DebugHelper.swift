@@ -8,7 +8,7 @@
 import Foundation
 
 // Change to false before App Store submission
-let DEBUG_MODE = false
+let DEBUG_MODE = true
 
 func debugPrint(_ message: String) {
     if DEBUG_MODE {
