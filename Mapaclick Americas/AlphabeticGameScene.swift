@@ -417,16 +417,20 @@ class AlphabeticGameScene: SKScene{
         }
 
         // Cover Hawaii islands with a blue rectangle matching the scene background
-        // Anchor to the left edge of the golden rect so cover doesn't overlap the golden border
+        // Added as child of mapRectangleGestureMGMT so it zooms/pans with the map
         let goldenRectLeftEdge = centerX - (goldenRectWidth / 2)
         let coverWidth = goldenRectLeftEdge  // fills from screen left to golden rect edge
-        let hawaiiCover = SKSpriteNode(color: UIColor(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0), size: CGSize(width: coverWidth, height: 55 * mapScale))
+        // Convert scene-space size to map-node-space by dividing by mapScale (the parent's scale)
+        let hawaiiCover = SKSpriteNode(color: UIColor(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0), size: CGSize(width: coverWidth / mapScale, height: 55))
         hawaiiCover.anchorPoint = CGPoint(x: 0, y: 0.5)  // anchor at left edge
-        hawaiiCover.position = CGPoint(x: 0, y: centerY + (30 * mapScale))  // starts at screen left
+        // Convert scene position to map node's local coordinates
+        let scenePos = CGPoint(x: 0, y: centerY + (30 * mapScale))
+        let localPos = mapRectangleGestureMGMT.convert(scenePos, from: self)
+        hawaiiCover.position = localPos
         hawaiiCover.zPosition = 2  // above the map
         hawaiiCover.name = "hawaiiCover"
-        if self.childNode(withName: "hawaiiCover") == nil {
-            self.addChild(hawaiiCover)
+        if mapRectangleGestureMGMT.childNode(withName: "hawaiiCover") == nil {
+            mapRectangleGestureMGMT.addChild(hawaiiCover)
         }
     }
 
@@ -514,15 +518,20 @@ class AlphabeticGameScene: SKScene{
         self.addChild(labelScores)
 
         // Cover Hawaii islands — only visible on smallest iPhones (750x1334)
+        // Added as child of mapRectangleGestureMGMT so it zooms/pans with the map
         let goldenRectLeftEdge = centerX - (mapRectangleGestureMGMT.size.width / 2)
         let coverWidth = goldenRectLeftEdge
-        let hawaiiCover = SKSpriteNode(color: UIColor(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0), size: CGSize(width: coverWidth, height: 55 * mapScale))
+        // Convert scene-space size to map-node-space by dividing by mapScale (the parent's scale)
+        let hawaiiCover = SKSpriteNode(color: UIColor(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0), size: CGSize(width: coverWidth / mapScale, height: 55))
         hawaiiCover.anchorPoint = CGPoint(x: 0, y: 0.5)
-        hawaiiCover.position = CGPoint(x: 0, y: centerY + (30 * mapScale))
+        // Convert scene position to map node's local coordinates
+        let scenePos = CGPoint(x: 0, y: centerY + (30 * mapScale))
+        let localPos = mapRectangleGestureMGMT.convert(scenePos, from: self)
+        hawaiiCover.position = localPos
         hawaiiCover.zPosition = 2
         hawaiiCover.name = "hawaiiCover"
-        if self.childNode(withName: "hawaiiCover") == nil {
-            self.addChild(hawaiiCover)
+        if mapRectangleGestureMGMT.childNode(withName: "hawaiiCover") == nil {
+            mapRectangleGestureMGMT.addChild(hawaiiCover)
         }
     }
     //Execute attributes for scaling and positioning based on device screen size
@@ -728,14 +737,24 @@ class AlphabeticGameScene: SKScene{
         // and boundaries grow proportionally as the user zooms in — allowing them
         // to reach map edges (Greenland top, Argentina bottom) without the map
         // ever disappearing off screen.
+        // Multipliers are branched by device idiom so iPad and iPhone can be tuned independently.
         let zoomRatio = mapRectangleGestureMGMT.xScale / baseMapScale
         let panFactor = max(0, zoomRatio - 1)
         let halfWidth = self.size.width / 2
         let halfHeight = self.size.height / 2
-        let minX = baseMapPosition.x - panFactor * halfWidth * 0.7
-        let maxX = baseMapPosition.x + panFactor * halfWidth * 0.7
-        let minY = baseMapPosition.y - panFactor * halfHeight * 0.45
-        let maxY = baseMapPosition.y + panFactor * halfHeight * 0.45
+        let horizontalMultiplier: CGFloat
+        let verticalMultiplier: CGFloat
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            horizontalMultiplier = 0.7
+            verticalMultiplier = 0.45
+        } else {
+            horizontalMultiplier = 0.7
+            verticalMultiplier = 0.45
+        }
+        let minX = baseMapPosition.x - panFactor * halfWidth * horizontalMultiplier
+        let maxX = baseMapPosition.x + panFactor * halfWidth * horizontalMultiplier
+        let minY = baseMapPosition.y - panFactor * halfHeight * verticalMultiplier
+        let maxY = baseMapPosition.y + panFactor * halfHeight * verticalMultiplier
 
         //Flag variable allows pan only when zoom in have taken place
         if isScaled == true {
@@ -1027,15 +1046,31 @@ class AlphabeticGameScene: SKScene{
             }
         
         
-        //The following block limits the scaling(Zoom effect) from 2.4(default size) and no larger than 3.0 for devices Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5)
+        // iPad dynamic zoom clamping — uses baseMapScale/maxZoomScale set by setScaleAndIndepRenderingPositioningForAllIpads()
+        // Emulates the same dynamic approach used by iPhones, branched by device idiom to keep settings isolated
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            if mapRectangleGestureMGMT.xScale * sender.scale < baseMapScale {
+                sender.scale = baseMapScale / mapRectangleGestureMGMT.xScale
+            } else if mapRectangleGestureMGMT.xScale * sender.scale > maxZoomScale {
+                sender.scale = maxZoomScale / mapRectangleGestureMGMT.xScale
+            }
+
+            if mapRectangleGestureMGMT.yScale * sender.scale < baseMapScale {
+                sender.scale = baseMapScale / mapRectangleGestureMGMT.yScale
+            } else if mapRectangleGestureMGMT.yScale * sender.scale > maxZoomScale {
+                sender.scale = maxZoomScale / mapRectangleGestureMGMT.yScale
+            }
+            debugPrint("iPad dynamic scaling: base=\(baseMapScale), max=\(maxZoomScale)")
+        }
+
+        // Commented out — iPad zoom now uses dynamic baseMapScale/maxZoomScale above
+        /*//The following block limits the scaling(Zoom effect) from 2.4(default size) and no larger than 3.0 for devices Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5)
         if screenSize.width == 2048.0 && screenSize.height == 2732.0{
-            //debugPrint("iPad Pro12.9 entering handlePinch func")
             if mapRectangleGestureMGMT.xScale * sender.scale < 2.4 {
                 sender.scale = 2.4 / mapRectangleGestureMGMT.xScale
             } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
                 sender.scale = 3.0 / mapRectangleGestureMGMT.xScale
             }
-        
             if mapRectangleGestureMGMT.yScale * sender.scale < 2.4 {
                 sender.scale = 2.4 / mapRectangleGestureMGMT.yScale
             } else if mapRectangleGestureMGMT.yScale * sender.scale > 3.0 {
@@ -1043,38 +1078,32 @@ class AlphabeticGameScene: SKScene{
             }
             debugPrint("Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5), iPad Air 13inch(6th gen M2, M3) scaling is limited")
         }
-        //The following block limits the scaling(Zoom effect) from 1.85(default size) and no larger than 3.0 for device iPad Pro 10.5, Pro11(1gen), Air(3gen), 7Gen, Pro11(2gen), 8Gen, 9Gen, Air(4gen), PRO11(3gen), Air(5gen), 10Gen, Pro11(4gen), iPad 6Gen, Mini(5gen), Mini(6gen)
         else if screenSize.width == 1668.0 && screenSize.height == 2224.0  || screenSize.width == 1668.0 && screenSize.height == 2388.0 || screenSize.width == 1620.0 && screenSize.height == 2160.0 || screenSize.width == 1640.0 && screenSize.height == 2360.0 ||  screenSize.width == 1668.0 && screenSize.height == 2420.0{
-            //debugPrint("iPad Pro 10.5, Pro11(1gen), Air(3gen), 7Gen, Pro11(2gen), 8Gen, 9Gen, Air(4gen), PRO11(3gen), Air(5gen), 10Gen, Pro11(4gen), iPad 6Gen, Mini(5gen), Mini(6gen) entering handlePinch func")
             if mapRectangleGestureMGMT.xScale * sender.scale < 2.1 {
                 sender.scale = 2.1 / mapRectangleGestureMGMT.xScale
             } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
                 sender.scale = 3.0 / mapRectangleGestureMGMT.xScale
             }
-
             if mapRectangleGestureMGMT.yScale * sender.scale < 2.1 {
                 sender.scale = 2.1 / mapRectangleGestureMGMT.yScale
             } else if mapRectangleGestureMGMT.yScale * sender.scale > 3.0 {
             sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
             }
-            debugPrint("iPad Air 11inch(M2 18.6), iPad Air 11inch(M3 18.6), iPad Pro 11inch(1st-4th gen 18.6), iPad 11 inch(M4 18.6), iPad Air(3rd gen 18.6), iPad Air(4th-5th gen 18.6), iPad(7th-9th gen 18.6), Ipad 10th Gen(18.6), iPad A16(11 Gen 18.6), iPad Pro 10.5 scaling is limited")
+            debugPrint("iPad Air 11inch(M2 18.6) etc scaling is limited")
         }
-        
         else if screenSize.width == 1536.0 && screenSize.height == 2048.0 || screenSize.width == 1488.0 && screenSize.height == 2266.0 {
-            //debugPrint("iPad Pro 10.5, Pro11(1gen), Air(3gen), 7Gen, Pro11(2gen), 8Gen, 9Gen, Air(4gen), PRO11(3gen), Air(5gen), 10Gen, Pro11(4gen), iPad 6Gen, Mini(5gen), Mini(6gen) entering handlePinch func")
             if mapRectangleGestureMGMT.xScale * sender.scale < 1.85 {
                 sender.scale = 1.85 / mapRectangleGestureMGMT.xScale
             } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
                 sender.scale = 3.0 / mapRectangleGestureMGMT.xScale
             }
-
             if mapRectangleGestureMGMT.yScale * sender.scale < 1.85 {
                 sender.scale = 1.85 / mapRectangleGestureMGMT.yScale
             } else if mapRectangleGestureMGMT.yScale * sender.scale > 3.0 {
             sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
             }
             debugPrint("iPad 6Gen, iPad Mini(5gen 18.6), iPad Mini(6gen 18.6), iPad Mini(A17Pro 18.6) scaling is limited")
-        }
+        }*/
         
         // Commented out — now falls through to dynamic else block using baseMapScale/maxZoomScale
         /*else if screenSize.width == 1242.0 && screenSize.height == 2288.0 || screenSize.width == 828.0 && screenSize.height == 1792.0 || screenSize.width == 1242.0 && screenSize.height == 2688.0{
@@ -1187,27 +1216,34 @@ class AlphabeticGameScene: SKScene{
         
         //Asses if the node is scaled or not(scaled to default size)
         if sender.state == .ended{
-                //Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5)
+            // iPad dynamic isScaled check — uses baseMapScale set by setScaleAndIndepRenderingPositioningForAllIpads()
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                if mapRectangleGestureMGMT.xScale > baseMapScale && mapRectangleGestureMGMT.yScale > baseMapScale {
+                    isScaled = true
+                    debugPrint("iPad dynamic isScaled check: base=\(baseMapScale) — iPad is scaled")
+                }
+            }
+
+            // Commented out — iPad isScaled now uses dynamic baseMapScale above
+            /*//Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5)
             if screenSize.width == 2048.0 && screenSize.height == 2732.0{
                 if mapRectangleGestureMGMT.xScale > 2.4 && mapRectangleGestureMGMT.yScale > 2.4 {
                     isScaled = true
                     debugPrint("Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5), iPad Air 13inch(6th gen M2, M3)  is scaled")
                 }
             }
-            
             else if screenSize.width == 1668.0 && screenSize.height == 2224.0 || screenSize.width == 1668.0 && screenSize.height == 2388.0 || screenSize.width == 1620.0 && screenSize.height == 2160.0 || screenSize.width == 1640.0 && screenSize.height == 2360.0 || screenSize.width == 1668.0 && screenSize.height == 2420.0 {
                 if mapRectangleGestureMGMT.xScale > 2.1 && mapRectangleGestureMGMT.yScale > 2.1{
                     isScaled = true
-                    debugPrint("iPad Air 11inch(M2 18.6), iPad Air 11inch(M3 18.6), iPad Pro 11inch(1st-4th gen 18.6), iPad 11 inch(M4 18.6), iPad Air(3rd gen 18.6), iPad Air(4th-5th gen 18.6), iPad(7th-9th gen 18.6), Ipad 10th Gen(18.6), iPad A16(11 Gen 18.6), iPad Pro 10.5 is scaled")
+                    debugPrint("iPad Air 11inch(M2 18.6) etc is scaled")
                 }
             }
-            
             else if screenSize.width == 1536.0 && screenSize.height == 2048.0 || screenSize.width == 1488.0 && screenSize.height == 2266.0  {
                 if mapRectangleGestureMGMT.xScale > 1.85 && mapRectangleGestureMGMT.yScale > 1.85{
                     isScaled = true
                     debugPrint("iPad 6Gen, iPad Mini(5gen 18.6), iPad Mini(6gen 18.6), iPad Mini(A17Pro 18.6) is scaled")
                 }
-            }
+            }*/
             
             // Commented out — now falls through to dynamic else block using baseMapScale
             /*else if screenSize.width == 1242.0 && screenSize.height == 2288.0 || screenSize.width == 828.0 && screenSize.height == 1792.0 || screenSize.width == 1242.0 && screenSize.height == 2688.0{
@@ -1262,106 +1298,58 @@ class AlphabeticGameScene: SKScene{
             
             
             let tolerance: CGFloat = 0.001
-            
-            //debugPrint("Last Screen size: \(screenSize)")
-            switch (screenSize.width, screenSize.height) {
-             // checking if the absolute difference between the current scaling factor and the target scaling factor is smaller than the tolerance value. If it is, it means that the scaling factor is very close to the target value, indicating that the node has been scaled back to the normal size
+
+            // iPad dynamic snap-back — uses baseMapScale/baseMapPosition set by setScaleAndIndepRenderingPositioningForAllIpads()
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                if abs(mapRectangleGestureMGMT.xScale - baseMapScale) < tolerance && abs(mapRectangleGestureMGMT.yScale - baseMapScale) < tolerance {
+                    isScaled = false
+                    mapRectangleGestureMGMT.position = baseMapPosition
+                    debugPrint("iPad dynamic snap-back: base=\(baseMapScale) — back to original position")
+                }
+            }
+            // iPhone snap-back — dynamic, uses baseMapScale/baseMapPosition set by setScaleAndIndepRenderingPositioningForAllIphones()
+            else {
+                if abs(mapRectangleGestureMGMT.xScale - baseMapScale) < tolerance && abs(mapRectangleGestureMGMT.yScale - baseMapScale) < tolerance {
+                    isScaled = false
+                    mapRectangleGestureMGMT.position = baseMapPosition
+                    debugPrint("iPhone dynamic snap-back: base=\(baseMapScale) — back to original position")
+                }
+            }
+
+            // Commented out — iPad and iPhone snap-back now both use dynamic baseMapScale/baseMapPosition above
+            /*switch (screenSize.width, screenSize.height) {
                 case (2048.0, 2732.0):
-                     //debugPrint("Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5)")
                      if abs(mapRectangleGestureMGMT.xScale - 2.4) < tolerance && abs(mapRectangleGestureMGMT.yScale - 2.4) < tolerance {
                         isScaled = false
-                        mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
-                        debugPrint("Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5), iPad Air 13inch(6th gen M2, M3) is back to original position")
+                        mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00)
+                        debugPrint("Pro12.9 etc is back to original position")
                     }
-               
-              
             case (1668.0, 2224.0), (1668.0,2388.0), (1620.0, 2160.0), (1640.0, 2360.0), (1668.0, 2420.0):
-                    //debugPrint("iPad Pro 10.5, Pro11(1gen), Air(3gen), 7Gen, Pro11(2gen), 8Gen, 9Gen, Air(4gen), PRO11(3gen), Air(5gen), 10Gen, Pro11(4gen), iPad 6Gen, Mini(5gen), Mini(6gen)")
                 if abs(mapRectangleGestureMGMT.xScale - 2.1) < tolerance && abs(mapRectangleGestureMGMT.yScale - 2.1) < tolerance {
                         isScaled = false
-                        mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
-                    debugPrint("iPad Air 11inch(M2 18.6), iPad Air 11inch(M3 18.6), iPad Pro 11inch(1st-4th gen 18.6), iPad 11 inch(M4 18.6), iPad Air(3rd gen 18.6), iPad Air(4th-5th gen 18.6), iPad(7th-9th gen 18.6), Ipad 10th Gen(18.6), iPad A16(11 Gen 18.6), iPad Pro 10.5 is back to original position")
+                        mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00)
+                    debugPrint("iPad Air 11inch(M2 18.6) etc is back to original position")
                     }
-                
             case (1536.0, 2048.0), (1488.0, 2266.0):
                 if abs(mapRectangleGestureMGMT.xScale - 1.85) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.85) < tolerance {
                     isScaled = false
-                    mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
-                    debugPrint("iPad 6Gen, iPad Mini(5gen 18.6), iPad Mini(6gen 18.6), iPad Mini(A17Pro 18.6) back to original position")
+                    mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00)
+                    debugPrint("iPad 6Gen, iPad Mini etc back to original position")
                 }
-                    
-            // Dynamic snap-back for screens (750,1334), (1080,2340), (1125,2436).
-            // When the user pinches back to baseMapScale (within tolerance), the map resets:
-            // isScaled is set to false (disabling panning) and position snaps to baseMapPosition
-            // (the original centered position computed by the positioning function during didMove).
             case (750.0, 1334.0), (1080.0, 2340.0),(1125.0, 2436.0), (1242.0, 2208.0), (828.0, 1792.0), (1242.0, 2688.0), (1170.0, 2532.0), (1179.0, 2556.0), (1284.0, 2778.0), (1290.0, 2796.0), (1206.0, 2622.0), (1320.0, 2868.0):
                     if abs(mapRectangleGestureMGMT.xScale - baseMapScale) < tolerance && abs(mapRectangleGestureMGMT.yScale - baseMapScale) < tolerance {
                         isScaled = false
                         mapRectangleGestureMGMT.position = baseMapPosition
-                        debugPrint("Dynamic snap-back: base=\(baseMapScale) — iPhoneSE(2nd/3rd gen), 8, iPhone 12 mini, 13 mini, X, XS, 11 PRO, Xr, 11, Xs Max, 11 Pro Max, 12, 12Pro, 13, 13Pro, 14, 14Pro, 15, 15Pro, 16, 16e, 12ProMax, 13ProMax, 14plus, 14ProMax, 15plus, 15ProMax, 16Plus back to original position")
+                        debugPrint("iPhone dynamic snap-back")
                     }
-
-            // Commented out — now merged into dynamic snap-back case above
-            /*case (1242.0, 2208.0), (828.0, 1792.0 ),(1242.0, 2688.0 ) :
-                //debugPrint("iPhone 8plus, XR, 11, XSMax, 11ProMax")
-                if abs(mapRectangleGestureMGMT.xScale - 1.45) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.45) < tolerance {
-                    isScaled = false
-                    mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.716/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
-                    debugPrint("iPhone Xr, 11, Xs Max, 11 Pro Max is back to original position")
-                }*/
-                    
-                
-                
-            // Commented out — now merged into dynamic snap-back case above
-            /*case (1170.0, 2532.0), (1179.0, 2556.0):
-                 //debugPrint("iPhone 12, 12Pro, 13, 13Pro, 14, 14Pro")
-                 if abs(mapRectangleGestureMGMT.xScale - 1.37) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.37) < tolerance {
-                    isScaled = false
-                     mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.67/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
-                    debugPrint("iPhone 12, iPhone 12Pro, iPhone 13, iPhone 13 Pro, iPhone 14, iPhone 14 Pro, iPhone 15, iPhone 15 Pro, iPhone 16, iPhone 16e is back to original position")
-                }*/
-                    
-                
-                
-            // Commented out — now merged into dynamic snap-back case above
-            /*case (1284.0, 2778.0), (1290.0, 2796.0):
-                 //debugPrint("iPhone 12ProMax, 13ProMax, 14plus, 13Pro, 14ProMax")
-                 if abs(mapRectangleGestureMGMT.xScale - 1.5) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.5) < tolerance {
-                    isScaled = false
-                     mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.72/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
-                    debugPrint("iPhone 12ProMax, iPhone 13 Pro Max, iPhone 14 plus, iPhone 14 ProMax, iPhone 15 plus, iPhone 15 ProMax, iPhone 16 Plus is back to original position")
-                }*/
-                
-            // Commented out — now merged into dynamic snap-back case above
-            /*case (1206.0, 2622.0):
-                 //debugPrint("iPhone 12, 12Pro, 13, 13Pro, 14, 14Pro")
-                 if abs(mapRectangleGestureMGMT.xScale - 1.37) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.37) < tolerance {
-                    isScaled = false
-                     mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.72/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
-                    debugPrint("iPhone 16 PRO, iPhone 17, iPhone 17 PRO is back to original position")
-                }*/
-                
-            // Commented out — now merged into dynamic snap-back case above
-            /*case (1320.0, 2868.0):
-                 //debugPrint("iPhone 12ProMax, 13ProMax, 14plus, 13Pro, 14ProMax")
-                 if abs(mapRectangleGestureMGMT.xScale - 1.5) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.5) < tolerance {
-                    isScaled = false
-                     mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 1.765/*1.8*/)//Whenever node is scaled back to default size the node is repositioned at default position or center
-                    debugPrint("iPhone 16 ProMax, iPhone 17 ProMax is back to original position")
-                }*/
-                    
-                    
-                // Default fallback uses the same dynamic snap-back logic.
-                // Catches any screen size not explicitly listed above.
                 default:
                     if abs(mapRectangleGestureMGMT.xScale - baseMapScale) < tolerance && abs(mapRectangleGestureMGMT.yScale - baseMapScale) < tolerance {
                     isScaled = false
                     mapRectangleGestureMGMT.position = baseMapPosition
-                        debugPrint("Default dynamic snap-back: base=\(baseMapScale) — back to original position")
+                        debugPrint("Default dynamic snap-back")
                     }
                     break
-                
-            }
+            }*/
 
         }
     }
