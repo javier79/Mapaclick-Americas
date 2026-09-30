@@ -869,6 +869,12 @@ class AlphabeticGameScene: SKScene{
                     return//taps on the rest of the panel are ignored(no penalty)
                 }
 
+                /**Timer and score label also render above the zoomed map, taps on them are ignored so they don't reach the country nodes underneath(no penalty).
+                 Both are children of self, so location(scene coordinates) can be tested directly*/
+                if timerBackgroundTwo.contains(location) || (labelScores.parent != nil && labelScores.frame.contains(location)) {
+                    return
+                }
+
                 let touchedNode = self.physicsWorld.body(at:location)//Defines that touch will take effect when it gets in contact with an SKphysics body
                 
                 
