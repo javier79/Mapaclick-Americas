@@ -855,7 +855,20 @@ class AlphabeticGameScene: SKScene{
                             tutorial.handleTouch(at: location)
                             return
                         }
-                
+
+                /**Control panel has priority over the map. When the map is zoomed, country nodes can sit underneath the panel and physicsWorld.body(at:) may return the
+                 country instead of the button, so taps inside the panel are resolved here and never reach the map nodes below*/
+                if controlPanelSKSpriteNode.contains(location) {
+                    let locationInPanel = controlPanelSKSpriteNode.convert(location, from: self)//buttons are children of the panel, contains() expects parent coordinates
+                    if skipButton.parent != nil && skipButton.contains(locationInPanel) {//skipButton is removed from the panel when one country is left
+                        addOneTocurrentIndexSetNameToLookUp()
+                    }
+                    else if exitRedButton.contains(locationInPanel) {
+                        goToStartMenu()
+                    }
+                    return//taps on the rest of the panel are ignored(no penalty)
+                }
+
                 let touchedNode = self.physicsWorld.body(at:location)//Defines that touch will take effect when it gets in contact with an SKphysics body
                 
                 
