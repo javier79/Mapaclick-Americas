@@ -97,6 +97,11 @@ class AlphabeticGameScene: SKScene{
     var countriesNameBGScale: CGFloat = 1.10  // Scale for countriesNameBackground — set by device function, applied after resizeCountryNameBackground()
     
     var isAdShowing: Bool = false//Ads Logic
+
+    // Gesture recognizers added to the SKView in didMove — kept here so they can be removed when the scene leaves the view
+    var pinchRecognizer: UIPinchGestureRecognizer?
+    var tapRecognizer: UITapGestureRecognizer?
+    var panGestureRecognizer: UIPanGestureRecognizer?
     
     let screenSize = UIScreen.main.nativeBounds
     
@@ -198,16 +203,30 @@ class AlphabeticGameScene: SKScene{
         
         
         //set an call hand gesture recognizers
-        let pinchRecognizer: UIPinchGestureRecognizer = UIPinchGestureRecognizer(target:self, action: #selector(self.handlePinchFrom(_:)))
+        /*let pinchRecognizer: UIPinchGestureRecognizer = UIPinchGestureRecognizer(target:self, action: #selector(self.handlePinchFrom(_:)))
         self.view!.addGestureRecognizer(pinchRecognizer)
-        
+
         let tapRecognizer: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.handleTapFrom(_:)))
         tapRecognizer.numberOfTapsRequired = 1
         self.view!.addGestureRecognizer(tapRecognizer)
-        
+
         let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.handlePan(_:)))
         // Add the gesture recognizer to the scene's view
-        self.view!.addGestureRecognizer(panGestureRecognizer)
+        self.view!.addGestureRecognizer(panGestureRecognizer)*/
+        // Recognizers are stored as properties so removeGameGestureRecognizers() can detach them when the scene leaves the view
+        let pinch = UIPinchGestureRecognizer(target:self, action: #selector(self.handlePinchFrom(_:)))
+        self.view!.addGestureRecognizer(pinch)
+        pinchRecognizer = pinch
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTapFrom(_:)))
+        tap.numberOfTapsRequired = 1
+        self.view!.addGestureRecognizer(tap)
+        tapRecognizer = tap
+
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(self.handlePan(_:)))
+        // Add the gesture recognizer to the scene's view
+        self.view!.addGestureRecognizer(pan)
+        panGestureRecognizer = pan
         
         
         
@@ -230,6 +249,28 @@ class AlphabeticGameScene: SKScene{
         // }
 
     }
+    //Called right before the scene is removed from the view(exit to StartMenu or transition to GameOverScene)
+    override func willMove(from view: SKView) {
+        removeGameGestureRecognizers()
+    }
+
+    //Detaches this scene's tap, pinch and pan recognizers from the SKView. The SKView is shared by every scene, so without this
+    //each new game would stack three more recognizers and the old ones would keep pointing at a finished scene
+    func removeGameGestureRecognizers() {
+        if let pinch = pinchRecognizer {
+            view?.removeGestureRecognizer(pinch)
+        }
+        if let tap = tapRecognizer {
+            view?.removeGestureRecognizer(tap)
+        }
+        if let pan = panGestureRecognizer {
+            view?.removeGestureRecognizer(pan)
+        }
+        pinchRecognizer = nil
+        tapRecognizer = nil
+        panGestureRecognizer = nil
+    }
+
     //Ads Logic
     @objc func adWillShow() {
         isAdShowing = true
@@ -1620,6 +1661,7 @@ class AlphabeticGameScene: SKScene{
     func goToGameOverScene(){
         musicPlayer?.stop()
         // AdManager.shared.removeBanner()
+        removeGameGestureRecognizers()//detach before the 1.5s fade so taps during the transition don't reach the finished game
         let gameOverScene = GameOverScene(size: self.size)
         let transition = SKTransition.fade(withDuration: 1.5)
         self.view?.presentScene(gameOverScene, transition: transition)
