@@ -2554,7 +2554,8 @@ class AlphabeticGameScene: SKScene{
     func resizeCountryNameBackground(){
         // Reset scale before measuring so frame calculations are accurate
         countriesNameBackground.setScale(1.0)
-        let isIPad = countriesNameBGScale > 1.10
+        //let isIPad = countriesNameBGScale > 1.10
+        let isIPad = UIDevice.current.userInterfaceIdiom == .pad//device check instead of inferring from countriesNameBGScale(same idiom check used by didMove, handlePan and handlePinchFrom)
         let horizontalPadding: CGFloat = 36.0
         let bgHeight: CGFloat = isIPad ? 20.0 * (countriesNameBGScale / 1.10) : 30.0
         let bgScale: CGFloat = 1.10
@@ -2583,7 +2584,9 @@ class AlphabeticGameScene: SKScene{
         shapeNode.strokeColor = UIColor(red: 0.6471, green: 0.8431, blue: 0.9098, alpha: 1.0)
         shapeNode.lineWidth = 4.0
 
-        let textureView = SKView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
+        //let textureView = SKView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
+        //Reuse the scene's own SKView to render the texture, a throwaway SKView is only created as fallback if the scene has no view yet
+        let textureView = self.view ?? SKView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
         if let texture = textureView.texture(from: shapeNode) {
             countriesNameBackground.texture = texture
             countriesNameBackground.size = texture.size()
