@@ -1761,6 +1761,13 @@ class AlphabeticGameScene: SKScene{
         }
     }
     
+    //following function sets labels for country names and adds them to the map node(country map node) once it is identified
+    //Labels now live in InitSetMapNodes so AlphabeticGameScene, Practice games and GameOverScene all draw the same labels
+    func setLabelForCountryNameAndAddToNode(nodeSprite:SKSpriteNode){
+        InitSetMapNodes().addCountryNameLabel(to: nodeSprite)
+    }
+    
+    /*// MOVED TO InitSetMapNodes.swift(addCountryNameLabel, leader line functions, one/two line helpers and splitTextIntoFields) - kept for reference
     //following function sets labels for country names using one or two labels and adds labels to map node(country map node)
     func setLabelForCountryNameAndAddToNode(nodeSprite:SKSpriteNode){
 
@@ -2498,6 +2505,7 @@ class AlphabeticGameScene: SKScene{
             }
         return line2
     }
+    */
     
     func removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval(){
         let countOfIndexes = countries_names_array.count - 1//Gets the number of indexes in array
