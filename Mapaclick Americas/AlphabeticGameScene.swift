@@ -59,6 +59,7 @@ class AlphabeticGameScene: SKScene{
     let penalty = 3//seconds added to timer when wrong node is pressed
     
     static var completedGame = false/**flow control variable for timer once its value is true allows for timer to stop, and transition to gameOverScene*/
+    var isTransitioningToGameOver = false//flow control var, becomes true once goToGameOverScene() is called from update so the transition only happens once
     
     var useLine2:Bool = false//used on splitTextIntoFields functions and touch function.(intrinsic to function mechanism, dev should not be too concerned with it)
     var twoLineText: String = ""//used on splitTextIntoFields, this is the text passed to splitTextIntoFields functions
@@ -1586,12 +1587,17 @@ class AlphabeticGameScene: SKScene{
         /** This block  will execute when completedGame equals true(meaning all nodes were correctly identified), the function below will get gameOverScene. The reason to place here the game transition to gameOverScene is due Touch function needs "space" in order to perform without much lagging as scene transitioning and
          Touch function both require a lot of resouces that can compromise the flow of the game(so basically thats why the scene transition is not placed on Touch function)*/
         
-        if AlphabeticGameScene.completedGame == true{
+        /*if AlphabeticGameScene.completedGame == true{
+            goToGameOverScene()
+        }*/
+        //isTransitioningToGameOver makes sure the transition is requested only once instead of on every frame while the 1.5s fade runs
+        if AlphabeticGameScene.completedGame == true && isTransitioningToGameOver == false{
+            isTransitioningToGameOver = true
             goToGameOverScene()
         }
-        
+
     }
-    
+
     //Function adds seconds and minute, also adds penalties when wrong node or skip button is pressed
     func timerManagement(){
             addSecond()
