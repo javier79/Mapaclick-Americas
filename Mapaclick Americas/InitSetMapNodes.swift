@@ -150,6 +150,7 @@ class InitSetMapNodes{
      }
     
      func setLabelForCountryNameAndAddToNodePractice(nodeSprite:SKSpriteNode){
+         /*// Old label setup - replaced by shared addCountryNameLabel(to:) called at the end of this function
          let locationNameLabel = SKLabelNode()
          let firstLineLabel = SKLabelNode()
          let secondLineLabel = SKLabelNode()
@@ -173,7 +174,7 @@ class InitSetMapNodes{
                 if(useLine2 == true){ line2 = line2 + String(letter) }
             }
             return line2
-        }
+        }*/
         if AlphabeticGameScene.completedGame == true || RandomGameScene.completedGame == true || PracticeAlphabeticGameScene.completedGame == true || PracticeRandomGameScene.completedGame == true{
              let greenColor = UIColor.init(red: 0, green: 1, blue: 0.949, alpha: 1.0)
              nodeSprite.colorBlendFactor = 0.8
@@ -187,8 +188,12 @@ class InitSetMapNodes{
                  }
              }
          }
+         //Same labels, sizes, positions and leader lines as AlphabeticGameScene
+         addCountryNameLabel(to: nodeSprite)
+
+         /*// Old Practice/GameOver labels(no per-country tuning, no leader lines) - kept for reference
          locationNameLabel.text = nodeSprite.name
-         
+
          switch locationNameLabel.text {
          case "Canada":
             setOneLineCountryNameLabel(Oneline:locationNameLabel)
@@ -362,9 +367,10 @@ class InitSetMapNodes{
             locationNameLabel.horizontalAlignmentMode = .center
             locationNameLabel.verticalAlignmentMode = .center
          }
-         addChildSKLabelNodeToParentSKSpriteNode(parent: nodeSprite, children: locationNameLabel)
+         addChildSKLabelNodeToParentSKSpriteNode(parent: nodeSprite, children: locationNameLabel)*/
      }
 
+    /*// Old Practice/GameOver label helpers(gray text, 5.5/5.0 size) - replaced by the shared versions below copied from AlphabeticGameScene
     func setOneLineCountryNameLabel(Oneline:SKLabelNode){
         Oneline.fontName = "ArialMT"
         Oneline.fontColor = UIColor.init(red: 0.149, green: 0.149, blue: 0.149, alpha: 1.0)
@@ -377,6 +383,750 @@ class InitSetMapNodes{
         labelLineSecond.fontSize = 5.0
         labelLineFirst.fontColor = UIColor.init(red: 0.149, green: 0.149, blue: 0.149, alpha: 1.0)
         labelLineSecond.fontColor = UIColor.init(red: 0.149, green: 0.149, blue: 0.149, alpha: 1.0)
+    }*/
+
+    /**SHARED COUNTRY NAME LABELS
+     Moved from AlphabeticGameScene so every scene draws identical labels: AlphabeticGameScene calls addCountryNameLabel(to:) when a country is found,
+     Practice games and GameOverScene get it through setLabelForCountryNameAndAddToNodePractice(). Any label tweak made here applies to all scenes.*/
+    var useLine2:Bool = false//used on splitTextIntoFields functions and addCountryNameLabel(same mechanism as AlphabeticGameScene)
+    var twoLineText: String = ""//used on splitTextIntoFields, this is the text passed to splitTextIntoFields functions
+
+    //following function sets labels for country names using one or two labels and adds labels to map node(country map node)
+    func addCountryNameLabel(to nodeSprite:SKSpriteNode){
+
+           let locationNameLabel = SKLabelNode()
+           let firstLineLabel = SKLabelNode()
+           let secondLineLabel = SKLabelNode()
+           locationNameLabel.text = nodeSprite.name
+
+           switch nodeSprite.name {
+
+           // One-line countries - large landmasses
+           // Leader line countries (too small for inline label)
+           case "Belize":
+               addBelizeLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Brazil":
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.fontSize = 7.5
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+               locationNameLabel.position = CGPoint(x: 10.0, y: 10.0)
+
+           case "Canada":
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.fontSize = 7.0
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+               locationNameLabel.position = CGPoint(x: -41.0, y: -6.5)
+
+           case "Chile":
+               addChileLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Argentina":
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+               locationNameLabel.fontSize = 7.0
+               locationNameLabel.position = CGPoint(x: -1.0, y: 0.0)
+
+           case "Colombia":
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+               locationNameLabel.fontSize = 5.5
+
+           case "Cuba":
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+               locationNameLabel.fontSize = 6.0
+               locationNameLabel.position = CGPoint(x: 2.0, y: 0.0)
+
+           case "Ecuador":
+               addEcuadorLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Greenland":
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+               locationNameLabel.fontSize = 6.5
+               locationNameLabel.position = CGPoint(x: -5.0, y: 6.0)
+
+           case "Guatemala":
+               addGuatemalaLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Guyana":
+               addGuyanaLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Suriname":
+               addSurinameLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Haiti":
+               addHaitiLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Honduras":
+               addHondurasLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Jamaica":
+               addJamaicaLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Mexico":
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+               locationNameLabel.fontSize = 6.8
+
+           case "Nicaragua":
+               addNicaraguaLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Panama":
+               addPanamaLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Paraguay":
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+               locationNameLabel.fontSize = 5.0
+               locationNameLabel.zRotation = -0.6
+
+           case "Peru":
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+               locationNameLabel.fontSize = 6.0
+               locationNameLabel.position = CGPoint(x: -3.0, y: 0.0)
+               //locationNameLabel.zRotation = -0.9
+
+           case "Uruguay":
+               addUruguayLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Venezuela":
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+               locationNameLabel.fontSize = 5.5
+               locationNameLabel.position = CGPoint(x: 0.0, y: 3.0)
+
+           case "Bolivia":
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.fontSize = 7.0
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+               locationNameLabel.position = CGPoint(x: -1.5, y: 0.0)
+
+           // Two-line countries
+           case "United States":
+               setTwoLineCountryNameLabels(labelLineFirst:firstLineLabel, labelLineSecond:secondLineLabel)
+               firstLineLabel.text = splitTextIntoFields(theText:locationNameLabel.text!)
+               secondLineLabel.text = splitTextIntoFieldsTwo(theText:locationNameLabel.text!)
+               firstLineLabel.fontSize = 7.0
+               secondLineLabel.fontSize = 7.0
+               firstLineLabel.position = CGPoint(x: 40.0, y: -11.0)
+               secondLineLabel.position = CGPoint(x: 40.0, y: -18.5)
+
+           case "Costa Rica":
+               addCostaRicaLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Dominican Republic":
+               addDominicanRepublicLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "El Salvador":
+               addElSalvadorLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "French Guiana":
+               addFrenchGuianaLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Puerto Rico":
+               addPuertoRicoLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "The Bahamas":
+               addTheBahamasLeaderLineLabel(to: nodeSprite)
+               return
+
+           case "Lesser Antilles":
+               addLesserAntillesLeaderLineLabel(to: nodeSprite)
+               return
+
+           default:
+               setOneLineCountryNameLabel(Oneline:locationNameLabel)
+               locationNameLabel.horizontalAlignmentMode = .center
+               locationNameLabel.verticalAlignmentMode = .center
+           }
+
+           if(useLine2 == true){
+             nodeSprite.addChild(firstLineLabel)
+             nodeSprite.addChild(secondLineLabel)
+             useLine2 = false
+           }
+           else{
+             nodeSprite.addChild(locationNameLabel)
+           }
+       }
+    
+    // Belize: leader line pointing 2 o'clock over the Caribbean
+    func addBelizeLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Belize"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 5.0
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: 15.0, y: 6.5)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 0.0, y: 0.0))
+        path.addLine(to: CGPoint(x: 7.0, y: 5.5))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // Chile: leader line pointing left over the Pacific
+    func addChileLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Chile"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 7.0
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: -35.0, y: 0.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: -12.0, y: 0.0))
+        path.addLine(to: CGPoint(x: -25.0, y: 0.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // Costa Rica: two-line leader line pointing left over the Pacific
+    func addCostaRicaLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let firstLineLabel = SKLabelNode()
+        let secondLineLabel = SKLabelNode()
+        firstLineLabel.text = "Costa"
+        secondLineLabel.text = "Rica"
+        firstLineLabel.fontName = "ArialMT"
+        secondLineLabel.fontName = "ArialMT"
+        firstLineLabel.fontColor = UIColor.black
+        secondLineLabel.fontColor = UIColor.black
+        firstLineLabel.fontSize = 5.5
+        secondLineLabel.fontSize = 5.5
+        firstLineLabel.horizontalAlignmentMode = .center
+        secondLineLabel.horizontalAlignmentMode = .center
+        firstLineLabel.position = CGPoint(x: -15.0, y: -16.0)
+        secondLineLabel.position = CGPoint(x: -15.0, y: -21.5)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 0.0, y: 0.0))
+        path.addLine(to: CGPoint(x: -8.0, y: -10.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(firstLineLabel)
+        nodeSprite.addChild(secondLineLabel)
+    }
+
+    // Dominican Republic: two-line leader line pointing north-north-east
+    func addDominicanRepublicLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let firstLineLabel = SKLabelNode()
+        let secondLineLabel = SKLabelNode()
+        firstLineLabel.text = "Dominican"
+        secondLineLabel.text = "Republic"
+        firstLineLabel.fontName = "ArialMT"
+        secondLineLabel.fontName = "ArialMT"
+        firstLineLabel.fontColor = UIColor.black
+        secondLineLabel.fontColor = UIColor.black
+        firstLineLabel.fontSize = 5.0
+        secondLineLabel.fontSize = 5.0
+        firstLineLabel.horizontalAlignmentMode = .center
+        secondLineLabel.horizontalAlignmentMode = .center
+        firstLineLabel.position = CGPoint(x: 10.0, y: 12.0)
+        secondLineLabel.position = CGPoint(x: 10.0, y: 7.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 0.0, y: 0.0))
+        path.addLine(to: CGPoint(x: 6.0, y: 7.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(firstLineLabel)
+        nodeSprite.addChild(secondLineLabel)
+    }
+
+    // Ecuador: leader line pointing west between landmass and Galapagos
+    func addEcuadorLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Ecuador"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 5.5
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: -6.5, y: 0.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 5.0, y: 0.0))
+        path.addLine(to: CGPoint(x: 10.0, y: 0.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // Guatemala: leader line pointing southwest toward the Pacific
+    func addGuatemalaLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Guatemala"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 6.0
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: -18.0, y: -10.5)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 0.0, y: 0.0))
+        path.addLine(to: CGPoint(x: -10.0, y: -7.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // Haiti: leader line pointing straight south
+    func addHaitiLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Haiti"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 5.5
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: 0.0, y: -8.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 0.0, y: 0.0))
+        path.addLine(to: CGPoint(x: 0.0, y: -4.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // Honduras: short leader line pointing east toward the Caribbean
+    func addHondurasLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Honduras"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 4.5
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: 9.5, y: 7.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 4.0, y: 3.0))
+        path.addLine(to: CGPoint(x: 6.0, y: 5.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // Jamaica: leader line pointing straight south
+    func addJamaicaLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Jamaica"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 4.8
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: -4.0, y: -9.5)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 0.0, y: -0.5))
+        path.addLine(to: CGPoint(x: 0.0, y: -6.9))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // Nicaragua: leader line pointing 3 o'clock into the Caribbean
+    func addNicaraguaLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Nicaragua"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 5.0
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: 17.0, y: -2.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 0.0, y: -2.0))
+        path.addLine(to: CGPoint(x: 6.0, y: -2.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // Panama: leader line pointing 6 o'clock into the Pacific
+    func addPanamaLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Panama"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 5.5
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: -6.0, y: -12.5)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: -3.0, y: -2.0))
+        path.addLine(to: CGPoint(x: -3.0, y: -10.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // Guyana: leader line pointing straight north into the Atlantic
+    func addGuyanaLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Guyana"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 6.0
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: 2.5, y: 18.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 0.0, y: 5.0))
+        path.addLine(to: CGPoint(x: 0.0, y: 14.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // Suriname: leader line pointing between 1-2 o'clock into the Atlantic
+    func addSurinameLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Suriname"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 6.0
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: 11.0, y: 14.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 0.0, y: 0.0))
+        path.addLine(to: CGPoint(x: 9.0, y: 11.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // French Guiana: two-line leader line pointing east over the Atlantic
+    func addFrenchGuianaLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let firstLineLabel = SKLabelNode()
+        let secondLineLabel = SKLabelNode()
+        firstLineLabel.text = "French"
+        secondLineLabel.text = "Guiana"
+        firstLineLabel.fontName = "ArialMT"
+        secondLineLabel.fontName = "ArialMT"
+        firstLineLabel.fontColor = UIColor.black
+        secondLineLabel.fontColor = UIColor.black
+        firstLineLabel.fontSize = 6.0
+        secondLineLabel.fontSize = 6.0
+        firstLineLabel.horizontalAlignmentMode = .center
+        secondLineLabel.horizontalAlignmentMode = .center
+        firstLineLabel.position = CGPoint(x: 25.5, y: 2.0)
+        secondLineLabel.position = CGPoint(x: 25.5, y: -3.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 3.0, y: 0.0))
+        path.addLine(to: CGPoint(x: 14.0, y: 0.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.zPosition = 1
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(firstLineLabel)
+        nodeSprite.addChild(secondLineLabel)
+    }
+
+    // El Salvador: two-line leader line pointing south into the Pacific
+    func addElSalvadorLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let firstLineLabel = SKLabelNode()
+        let secondLineLabel = SKLabelNode()
+        firstLineLabel.text = "El"
+        secondLineLabel.text = "Salvador"
+        firstLineLabel.fontName = "ArialMT"
+        secondLineLabel.fontName = "ArialMT"
+        firstLineLabel.fontColor = UIColor.black
+        secondLineLabel.fontColor = UIColor.black
+        firstLineLabel.fontSize = 5.0
+        secondLineLabel.fontSize = 5.0
+        firstLineLabel.horizontalAlignmentMode = .center
+        secondLineLabel.horizontalAlignmentMode = .center
+        firstLineLabel.position = CGPoint(x: -4.0, y: -12.5)
+        secondLineLabel.position = CGPoint(x: -4.0, y: -17.5)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 0.0, y: 0.0))
+        path.addLine(to: CGPoint(x: -2.5, y: -5.5))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(firstLineLabel)
+        nodeSprite.addChild(secondLineLabel)
+    }
+
+    // Puerto Rico: two-line leader line pointing 3 o'clock from east coast
+    func addPuertoRicoLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let firstLineLabel = SKLabelNode()
+        let secondLineLabel = SKLabelNode()
+        firstLineLabel.text = "Puerto"
+        secondLineLabel.text = "Rico"
+        firstLineLabel.fontName = "ArialMT"
+        secondLineLabel.fontName = "ArialMT"
+        firstLineLabel.fontColor = UIColor.black
+        secondLineLabel.fontColor = UIColor.black
+        firstLineLabel.fontSize = 5.5
+        secondLineLabel.fontSize = 5.5
+        firstLineLabel.horizontalAlignmentMode = .center
+        secondLineLabel.horizontalAlignmentMode = .center
+        firstLineLabel.position = CGPoint(x: 18.0, y: 0.5)
+        secondLineLabel.position = CGPoint(x: 18.0, y: -5.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 3.0, y: 0.0))
+        path.addLine(to: CGPoint(x: 11.0, y: 0.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(firstLineLabel)
+        nodeSprite.addChild(secondLineLabel)
+    }
+
+    // The Bahamas: two-line leader line pointing north-east
+    func addTheBahamasLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let firstLineLabel = SKLabelNode()
+        let secondLineLabel = SKLabelNode()
+        firstLineLabel.text = "The"
+        secondLineLabel.text = "Bahamas"
+        firstLineLabel.fontName = "ArialMT"
+        secondLineLabel.fontName = "ArialMT"
+        firstLineLabel.fontColor = UIColor.black
+        secondLineLabel.fontColor = UIColor.black
+        firstLineLabel.fontSize = 5.0
+        secondLineLabel.fontSize = 5.0
+        firstLineLabel.horizontalAlignmentMode = .center
+        secondLineLabel.horizontalAlignmentMode = .center
+        firstLineLabel.position = CGPoint(x: 16.0, y: 14.0)
+        secondLineLabel.position = CGPoint(x: 16.0, y: 10.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 2.0, y: 2.0))
+        path.addLine(to: CGPoint(x: 10.0, y: 10.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(firstLineLabel)
+        nodeSprite.addChild(secondLineLabel)
+    }
+
+    // Uruguay: leader line pointing 3 o'clock into the Atlantic
+    func addUruguayLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let label = SKLabelNode()
+        label.text = "Uruguay"
+        label.fontName = "ArialMT"
+        label.fontColor = UIColor.black
+        label.fontSize = 6.0
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = CGPoint(x: 25.0, y: -3.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 3.0, y: -3.0))
+        path.addLine(to: CGPoint(x: 12.0, y: -3.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(label)
+    }
+
+    // Lesser Antilles: leader line pointing right from the island chain
+    func addLesserAntillesLeaderLineLabel(to nodeSprite: SKSpriteNode) {
+        let firstLineLabel = SKLabelNode()
+        firstLineLabel.text = "Lesser"
+        firstLineLabel.fontName = "ArialMT"
+        firstLineLabel.fontColor = UIColor.black
+        firstLineLabel.fontSize = 5.0
+        firstLineLabel.horizontalAlignmentMode = .left
+        firstLineLabel.verticalAlignmentMode = .center
+        // Arc node is at (0,0), islands are around (242.8, 297.55) — position label up-right to avoid Guyana overlap
+        firstLineLabel.position = CGPoint(x: 260.0, y: 306.0)
+
+        let secondLineLabel = SKLabelNode()
+        secondLineLabel.text = "Antilles"
+        secondLineLabel.fontName = "ArialMT"
+        secondLineLabel.fontColor = UIColor.black
+        secondLineLabel.fontSize = 5.0
+        secondLineLabel.horizontalAlignmentMode = .left
+        secondLineLabel.verticalAlignmentMode = .center
+        secondLineLabel.position = CGPoint(x: 260.0, y: 300.0)
+
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 247.0, y: 297.0))
+        path.addLine(to: CGPoint(x: 259.0, y: 303.0))
+        let line = SKShapeNode(path: path)
+        line.strokeColor = UIColor.black
+        line.lineWidth = 0.15
+
+        nodeSprite.addChild(line)
+        nodeSprite.addChild(firstLineLabel)
+        nodeSprite.addChild(secondLineLabel)
+    }
+
+    //sets attributes for label to use with one word country names
+    func setOneLineCountryNameLabel(Oneline:SKLabelNode){
+        //Oneline.text = countryNameLabel.text
+        Oneline.fontName = "ArialMT"//"Helvetica"
+        Oneline.fontColor = UIColor.black
+        //Oneline.xScale = -1.0
+        //Oneline.zRotation = 9.44
+        Oneline.fontSize = 8.0
+    }
+    //sets attributes for labels to use with two word country names
+    func setTwoLineCountryNameLabels(labelLineFirst:SKLabelNode, labelLineSecond:SKLabelNode){
+
+        labelLineFirst.fontName = "ArialMT"//"Helvetica"
+        labelLineSecond.fontName = "ArialMT"//"Helvetica"
+        labelLineFirst.fontSize = 3.0
+        labelLineSecond.fontSize = 3.0
+        labelLineFirst.fontColor = UIColor.black
+        labelLineSecond.fontColor = UIColor.black
+        //labelLineFirst.xScale = -1.0
+        //labelLineSecond.xScale = -1.0
+        //labelLineFirst.zRotation = 9.44
+        //labelLineSecond.zRotation = 9.44
+    }
+    
+    //The next two fucctions are identical with the difference that each return a different part of the text
+    func splitTextIntoFields(theText:String)->String{
+        
+        twoLineText = theText//text to split in two(ex:"Aguas Buenas")
+
+        var line1:String = ""//var declaration for String value to be returned
+        var line2:String = ""
+            
+            
+        for letter in twoLineText{//each character is split on each for loop iteration(one character at a time)
+            if (String(letter) == " "){
+                useLine2 = true
+            }
+                
+            if(useLine2 == false){
+                line1 = line1 + String(letter)//casting of letter to String
+            }
+            else {
+                line2 = line2 + String(letter)
+            }
+                
+            //i += 1
+        }
+        return line1
+    }
+    
+    func splitTextIntoFieldsTwo(theText:String)->String{
+        useLine2 = false//This lie resets the variable which is necessary in order not to create repetition of text ex Aguas Aguas Buenas
+        //var twoLineText: String = ""
+        twoLineText = theText
+        //var i: Int = 0
+        var line1:String = ""
+        var line2:String = ""
+            
+            
+        for letter in twoLineText{
+            if (String(letter) == " "){
+                useLine2 = true
+            }
+                
+            if(useLine2 == false){
+                line1 = line1 + String(letter)
+            }
+            else {
+                line2 = line2 + String(letter)
+            }
+                
+            //i += 1
+            }
+        return line2
     }
 
      func addChildSKSpriteNodeToParentSKNode(parent:SKNode, children:SKSpriteNode){
