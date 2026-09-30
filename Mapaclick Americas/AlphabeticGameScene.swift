@@ -72,7 +72,8 @@ class AlphabeticGameScene: SKScene{
     var currentIndex: Int = 0 //refers to index currently displayed on country name label declared at the top to be accesed by accesory functions
     var pressSKipButton:Bool = false//Flow control variables when true allows timer to add 15 penalty
     var scoreCount:Int = 0//variable represent the number of countries identified rendered in the control bar to the right
-    let totalScoreCount:String = "/30"
+    //let totalScoreCount:String = "/30"
+    let totalScoreCount:String = "/31"//must match countries_names_array.count
     
     let correctSound = SKAction.playSoundFileNamed("351566__bertrof__game-sound-correct-organic-violin", waitForCompletion: false)
     let incorrectSound = SKAction.playSoundFileNamed("351565__bertrof__game-sound-incorrect-organic-violin", waitForCompletion: false)
@@ -110,7 +111,9 @@ class AlphabeticGameScene: SKScene{
         // NotificationCenter.default.addObserver(self, selector: #selector(adDismissed), name: AdManager.adDismissedNotification, object: nil)
 
         backgroundNode = gameSceneObjects.createSceneBackground(scene: self)
-        
+
+        labelScores.text = "0" + totalScoreCount//overrides labelForScores() default text so initial total matches this scene
+
         //self.name = "alphabeticgame"
         //self.backgroundColor = UIColor.init(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0) /* #42c2ff */ /* #1cb3c8 */ //UIColor.init(red: 0.5373, green: 0.8431, blue: 0.9294, alpha: 1.0)//blue background that resembles the ocean
         
@@ -162,7 +165,8 @@ class AlphabeticGameScene: SKScene{
 
         // Remove texture so .size controls dimensions directly
         mapRectangleBackground.texture = nil
-        mapRectangleBackground.color = UIColor.yellow//init(red: 0.2588, green: 0.7608, blue: 1.0, alpha: 1.0)
+        //mapRectangleBackground.color = UIColor.yellow
+        mapRectangleBackground.color = UIColor.init(red: 0.2588, green: 0.7608, blue: 1.0, alpha: 1.0)
         mapRectangleBackground.colorBlendFactor = 1.0
         mapRectangleBackground.xScale = 1.0
         mapRectangleBackground.yScale = 1.0
