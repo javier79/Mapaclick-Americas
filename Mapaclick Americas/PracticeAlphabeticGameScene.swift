@@ -774,6 +774,8 @@ class PracticeAlphabeticGameScene: SKScene{
         }
     }
     
+    // Commented out — replaced by dynamic handlePan below, copied from AlphabeticGameScene(uses baseMapScale/baseMapPosition/maxZoomScale)
+    /*
     @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
         
         // Don't allow pan during tutorial
@@ -820,6 +822,53 @@ class PracticeAlphabeticGameScene: SKScene{
         }
        
     }
+    */
+
+    @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
+        
+        // Don't allow pan during tutorial
+            if tutorialOverlay != nil {
+                return
+            }
+        
+        // Pan boundaries in scene coordinates, expanding with zoom level.
+        // Uses (zoomRatio - 1) so at base zoom (no zoom) there's zero pan range,
+        // and boundaries grow proportionally as the user zooms in — allowing them
+        // to reach map edges (Greenland top, Argentina bottom) without the map
+        // ever disappearing off screen.
+        // Multipliers are branched by device idiom so iPad and iPhone can be tuned independently.
+        let zoomRatio = mapRectangleGestureMGMT.xScale / baseMapScale
+        let panFactor = max(0, zoomRatio - 1)
+        let halfWidth = self.size.width / 2
+        let halfHeight = self.size.height / 2
+        let horizontalMultiplier: CGFloat
+        let verticalMultiplier: CGFloat
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            horizontalMultiplier = 0.7
+            verticalMultiplier = 0.45
+        } else {
+            horizontalMultiplier = 0.7
+            verticalMultiplier = 0.45
+        }
+        let minX = baseMapPosition.x - panFactor * halfWidth * horizontalMultiplier
+        let maxX = baseMapPosition.x + panFactor * halfWidth * horizontalMultiplier
+        let minY = baseMapPosition.y - panFactor * halfHeight * verticalMultiplier
+        let maxY = baseMapPosition.y + panFactor * halfHeight * verticalMultiplier
+
+        //Flag variable allows pan only when zoom in have taken place
+        if isScaled == true {
+            let translation = gesture.translation(in: gesture.view)
+
+            // Apply translation first, then clamp to boundaries
+            // (old code clamped before translating, so position could escape bounds)
+            let newX = max(minX, min(maxX, mapRectangleGestureMGMT.position.x + translation.x))
+            let newY = max(minY, min(maxY, mapRectangleGestureMGMT.position.y - translation.y))
+
+            mapRectangleGestureMGMT.position = CGPoint(x: newX, y: newY)
+            gesture.setTranslation(.zero, in: view)
+        }
+       
+    }
 
        
     @objc func handleTapFrom(_ sender: UITapGestureRecognizer){
@@ -835,7 +884,26 @@ class PracticeAlphabeticGameScene: SKScene{
                        tutorial.handleTouch(at: location)
                        return
                    }
-                
+
+                /**Control panel has priority over the map. When the map is zoomed, country nodes can sit underneath the panel and physicsWorld.body(at:) may return the
+                 country instead of the button, so taps inside the panel are resolved here and never reach the map nodes below(same as AlphabeticGameScene)*/
+                if controlPanelSKSpriteNode.contains(location) {
+                    let locationInPanel = controlPanelSKSpriteNode.convert(location, from: self)//buttons are children of the panel, contains() expects parent coordinates
+                    if skipButton.parent != nil && skipButton.contains(locationInPanel) {//skipButton is removed from the panel when one country is left
+                        addOneTocurrentIndexSetNameToLookUp()
+                    }
+                    else if exitRedButton.contains(locationInPanel) {
+                        goToStartMenu()
+                    }
+                    return//taps on the rest of the panel are ignored(no penalty)
+                }
+
+                /**Timer and score label also render above the zoomed map, taps on them are ignored so they don't reach the country nodes underneath(no penalty).
+                 Both are children of self, so location(scene coordinates) can be tested directly*/
+                if timerBackgroundTwo.contains(location) || (labelScores.parent != nil && labelScores.frame.contains(location)) {
+                    return
+                }
+
                 let touchedNode = self.physicsWorld.body(at:location)//Defines that touch will take effect when it gets in contact with an SKphysics body
                 
                 
@@ -1062,6 +1130,8 @@ class PracticeAlphabeticGameScene: SKScene{
        
       
     
+    // Commented out — replaced by dynamic handlePinchFrom below, copied from AlphabeticGameScene(uses baseMapScale/baseMapPosition/maxZoomScale)
+    /*
     @objc func handlePinchFrom(_ sender: UIPinchGestureRecognizer) {
         
         // Don't allow pinch during tutorial
@@ -1417,6 +1487,323 @@ class PracticeAlphabeticGameScene: SKScene{
                 debugPrint("scaled back to normal")
                 }
             }*/
+        }
+    }
+    */
+
+    @objc func handlePinchFrom(_ sender: UIPinchGestureRecognizer) {
+        
+        // Don't allow pinch during tutorial
+        if tutorialOverlay != nil {
+                return
+            }
+        
+        
+        // iPad dynamic zoom clamping — uses baseMapScale/maxZoomScale set by setScaleAndIndepRenderingPositioningForAllIpads()
+        // Emulates the same dynamic approach used by iPhones, branched by device idiom to keep settings isolated
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            if mapRectangleGestureMGMT.xScale * sender.scale < baseMapScale {
+                sender.scale = baseMapScale / mapRectangleGestureMGMT.xScale
+            } else if mapRectangleGestureMGMT.xScale * sender.scale > maxZoomScale {
+                sender.scale = maxZoomScale / mapRectangleGestureMGMT.xScale
+            }
+
+            if mapRectangleGestureMGMT.yScale * sender.scale < baseMapScale {
+                sender.scale = baseMapScale / mapRectangleGestureMGMT.yScale
+            } else if mapRectangleGestureMGMT.yScale * sender.scale > maxZoomScale {
+                sender.scale = maxZoomScale / mapRectangleGestureMGMT.yScale
+            }
+            debugPrint("iPad dynamic scaling: base=\(baseMapScale), max=\(maxZoomScale)")
+        }
+
+        // Commented out — iPad zoom now uses dynamic baseMapScale/maxZoomScale above
+        /*//The following block limits the scaling(Zoom effect) from 2.4(default size) and no larger than 3.0 for devices Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5)
+        if screenSize.width == 2048.0 && screenSize.height == 2732.0{
+            if mapRectangleGestureMGMT.xScale * sender.scale < 2.4 {
+                sender.scale = 2.4 / mapRectangleGestureMGMT.xScale
+            } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
+                sender.scale = 3.0 / mapRectangleGestureMGMT.xScale
+            }
+            if mapRectangleGestureMGMT.yScale * sender.scale < 2.4 {
+                sender.scale = 2.4 / mapRectangleGestureMGMT.yScale
+            } else if mapRectangleGestureMGMT.yScale * sender.scale > 3.0 {
+            sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
+            }
+            debugPrint("Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5), iPad Air 13inch(6th gen M2, M3) scaling is limited")
+        }
+        else if screenSize.width == 1668.0 && screenSize.height == 2224.0  || screenSize.width == 1668.0 && screenSize.height == 2388.0 || screenSize.width == 1620.0 && screenSize.height == 2160.0 || screenSize.width == 1640.0 && screenSize.height == 2360.0 ||  screenSize.width == 1668.0 && screenSize.height == 2420.0{
+            if mapRectangleGestureMGMT.xScale * sender.scale < 2.1 {
+                sender.scale = 2.1 / mapRectangleGestureMGMT.xScale
+            } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
+                sender.scale = 3.0 / mapRectangleGestureMGMT.xScale
+            }
+            if mapRectangleGestureMGMT.yScale * sender.scale < 2.1 {
+                sender.scale = 2.1 / mapRectangleGestureMGMT.yScale
+            } else if mapRectangleGestureMGMT.yScale * sender.scale > 3.0 {
+            sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
+            }
+            debugPrint("iPad Air 11inch(M2 18.6) etc scaling is limited")
+        }
+        else if screenSize.width == 1536.0 && screenSize.height == 2048.0 || screenSize.width == 1488.0 && screenSize.height == 2266.0 {
+            if mapRectangleGestureMGMT.xScale * sender.scale < 1.85 {
+                sender.scale = 1.85 / mapRectangleGestureMGMT.xScale
+            } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
+                sender.scale = 3.0 / mapRectangleGestureMGMT.xScale
+            }
+            if mapRectangleGestureMGMT.yScale * sender.scale < 1.85 {
+                sender.scale = 1.85 / mapRectangleGestureMGMT.yScale
+            } else if mapRectangleGestureMGMT.yScale * sender.scale > 3.0 {
+            sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
+            }
+            debugPrint("iPad 6Gen, iPad Mini(5gen 18.6), iPad Mini(6gen 18.6), iPad Mini(A17Pro 18.6) scaling is limited")
+        }*/
+        
+        // Commented out — now falls through to dynamic else block using baseMapScale/maxZoomScale
+        /*else if screenSize.width == 1242.0 && screenSize.height == 2288.0 || screenSize.width == 828.0 && screenSize.height == 1792.0 || screenSize.width == 1242.0 && screenSize.height == 2688.0{
+
+            if mapRectangleGestureMGMT.xScale * sender.scale < 1.45 {
+                sender.scale = 1.45 / mapRectangleGestureMGMT.xScale
+            } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
+                sender.scale = 3.0 / mapRectangleGestureMGMT.xScale
+            }
+
+            if mapRectangleGestureMGMT.yScale * sender.scale < 1.45 {
+               sender.scale = 1.45 / mapRectangleGestureMGMT.yScale
+            } else if mapRectangleGestureMGMT.yScale * sender.scale > 3.0 {
+            sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
+            }
+            debugPrint("iPhone Xr(18.6), 11(18.6), Xs Max(18.6), 11 Pro Max(18.6) scaling is limited")
+        }*/
+        
+        // Commented out — now falls through to dynamic else block using baseMapScale/maxZoomScale
+        /*else if screenSize.width == 1170.0 && screenSize.height == 2532.0 || screenSize.width == 1179.0 && screenSize.height == 2556.0{
+
+            if mapRectangleGestureMGMT.xScale * sender.scale < 1.37 {
+                sender.scale = 1.37 / mapRectangleGestureMGMT.xScale
+            } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
+                sender.scale = 3.0 / mapRectangleGestureMGMT.xScale
+            }
+
+            if mapRectangleGestureMGMT.yScale * sender.scale < 1.37 {
+               sender.scale = 1.37 / mapRectangleGestureMGMT.yScale
+            } else if mapRectangleGestureMGMT.yScale * sender.scale > 3.0 {
+            sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
+            }
+            debugPrint("iPhone 12, iPhone 12Pro, iPhone 13, iPhone 13 Pro, iPhone 14, iPhone 14 Pro, iPhone 15, iPhone 15 Pro, iPhone 16, iPhone 16e scaling is limited")
+        }*/
+        
+        // Commented out — now falls through to dynamic else block using baseMapScale/maxZoomScale
+        /*else if screenSize.width == 1284.0 && screenSize.height == 2778.0 || screenSize.width == 1290.0 && screenSize.height == 2796.0{
+
+            if mapRectangleGestureMGMT.xScale * sender.scale < 1.5 {
+                sender.scale = 1.5 / mapRectangleGestureMGMT.xScale
+            } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
+                sender.scale = 3.0 / mapRectangleGestureMGMT.xScale
+            }
+
+            if mapRectangleGestureMGMT.yScale * sender.scale < 1.5 {
+               sender.scale = 1.5 / mapRectangleGestureMGMT.yScale
+            } else if mapRectangleGestureMGMT.yScale * sender.scale > 3.0 {
+            sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
+            }
+            debugPrint("iPhone 12ProMax, iPhone 13 Pro Max, iPhone 14 plus, iPhone 14 ProMax, iPhone 15 plus, iPhone 15 ProMax, iPhone 16 Plus scaling is limited")
+        }*/
+        
+        // Commented out — now falls through to dynamic else block using baseMapScale/maxZoomScale
+        /*else if screenSize.width == 1206.0 && screenSize.height == 2622.0 /*|| screenSize.width == 1179.0 && screenSize.height == 2556.0*/{
+
+            if mapRectangleGestureMGMT.xScale * sender.scale < 1.37 {
+                sender.scale = 1.37 / mapRectangleGestureMGMT.xScale
+            } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
+                sender.scale = 3.0 / mapRectangleGestureMGMT.xScale
+            }
+
+            if mapRectangleGestureMGMT.yScale * sender.scale < 1.37 {
+               sender.scale = 1.37 / mapRectangleGestureMGMT.yScale
+            } else if mapRectangleGestureMGMT.yScale * sender.scale > 3.0 {
+            sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
+            }
+            debugPrint("iPhone 16 PRO, iPhone 17, iPhone 17 PRO scaling is limited")
+        }*/
+        
+        // Commented out — now falls through to dynamic else block using baseMapScale/maxZoomScale
+        /*else if screenSize.width == 1320.0 && screenSize.height == 2868.0 {
+
+            if mapRectangleGestureMGMT.xScale * sender.scale < 1.5 {
+                sender.scale = 1.5 / mapRectangleGestureMGMT.xScale
+            } else if mapRectangleGestureMGMT.xScale * sender.scale > 3.0 {
+                sender.scale = 3.0 / mapRectangleGestureMGMT.xScale
+            }
+
+            if mapRectangleGestureMGMT.yScale * sender.scale < 1.5 {
+               sender.scale = 1.5 / mapRectangleGestureMGMT.yScale
+            } else if mapRectangleGestureMGMT.yScale * sender.scale > 3.0 {
+            sender.scale = 3.0 / mapRectangleGestureMGMT.yScale
+            }
+            debugPrint("iPhone 16 ProMAX, iPhone 17 ProMAX scaling is limited")
+        }*/
+        
+        // Dynamic zoom clamping for screens (750,1334), (1080,2340), (1125,2436) and default fallback.
+        // Uses baseMapScale (minimum/default zoom) and maxZoomScale (maximum zoom-in) instead of
+        // hardcoded values. These are set by the positioning function during didMove, so the pinch
+        // handler always stays in sync with however the map was initially scaled and positioned.
+        else{
+            if mapRectangleGestureMGMT.xScale * sender.scale < baseMapScale {
+                sender.scale = baseMapScale / mapRectangleGestureMGMT.xScale
+            } else if mapRectangleGestureMGMT.xScale * sender.scale > maxZoomScale {
+                sender.scale = maxZoomScale / mapRectangleGestureMGMT.xScale
+            }
+
+            if mapRectangleGestureMGMT.yScale * sender.scale < baseMapScale {
+                sender.scale = baseMapScale / mapRectangleGestureMGMT.yScale
+            } else if mapRectangleGestureMGMT.yScale * sender.scale > maxZoomScale {
+                sender.scale = maxZoomScale / mapRectangleGestureMGMT.yScale
+            }
+            debugPrint("Dynamic scaling: base=\(baseMapScale), max=\(maxZoomScale) — iPhoneSE(2nd/3rd gen), 8, iPhone 12 mini, iPhone 13 mini, iPhone X, iPhone XS, iPhone 11 PRO scaling is limited")
+        }
+        
+        //Set scaling action
+        let pinch = SKAction.scale(by: sender.scale, duration: 0.0)
+        mapRectangleGestureMGMT.run(pinch)
+        sender.scale = 1.00
+        
+        //Asses if the node is scaled or not(scaled to default size)
+        if sender.state == .ended{
+            // iPad dynamic isScaled check — uses baseMapScale set by setScaleAndIndepRenderingPositioningForAllIpads()
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                if mapRectangleGestureMGMT.xScale > baseMapScale && mapRectangleGestureMGMT.yScale > baseMapScale {
+                    isScaled = true
+                    debugPrint("iPad dynamic isScaled check: base=\(baseMapScale) — iPad is scaled")
+                }
+            }
+
+            // Commented out — iPad isScaled now uses dynamic baseMapScale above
+            /*//Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5)
+            if screenSize.width == 2048.0 && screenSize.height == 2732.0{
+                if mapRectangleGestureMGMT.xScale > 2.4 && mapRectangleGestureMGMT.yScale > 2.4 {
+                    isScaled = true
+                    debugPrint("Pro12.9 3gen(18.5), Pro12.9 4gen(18.5), Pro12.9 5gen(18.5), Pro12.9 6gen(18.5), iPad Air 13inch(6th gen M2, M3)  is scaled")
+                }
+            }
+            else if screenSize.width == 1668.0 && screenSize.height == 2224.0 || screenSize.width == 1668.0 && screenSize.height == 2388.0 || screenSize.width == 1620.0 && screenSize.height == 2160.0 || screenSize.width == 1640.0 && screenSize.height == 2360.0 || screenSize.width == 1668.0 && screenSize.height == 2420.0 {
+                if mapRectangleGestureMGMT.xScale > 2.1 && mapRectangleGestureMGMT.yScale > 2.1{
+                    isScaled = true
+                    debugPrint("iPad Air 11inch(M2 18.6) etc is scaled")
+                }
+            }
+            else if screenSize.width == 1536.0 && screenSize.height == 2048.0 || screenSize.width == 1488.0 && screenSize.height == 2266.0  {
+                if mapRectangleGestureMGMT.xScale > 1.85 && mapRectangleGestureMGMT.yScale > 1.85{
+                    isScaled = true
+                    debugPrint("iPad 6Gen, iPad Mini(5gen 18.6), iPad Mini(6gen 18.6), iPad Mini(A17Pro 18.6) is scaled")
+                }
+            }*/
+            
+            // Commented out — now falls through to dynamic else block using baseMapScale
+            /*else if screenSize.width == 1242.0 && screenSize.height == 2288.0 || screenSize.width == 828.0 && screenSize.height == 1792.0 || screenSize.width == 1242.0 && screenSize.height == 2688.0{
+                if mapRectangleGestureMGMT.xScale > 1.45 && mapRectangleGestureMGMT.yScale > 1.45{
+                    isScaled = true
+                    debugPrint("iPhone Xr(18.6), 11(18.6), Xs Max(18.6), 11 Pro Max(18.6) is Scaled")
+                }
+            }*/
+            
+            // Commented out — now falls through to dynamic else block using baseMapScale
+            /*else if screenSize.width == 1170.0 && screenSize.height == 2532.0 || screenSize.width == 1179.0 && screenSize.height == 2556.0 {
+                if mapRectangleGestureMGMT.xScale > 1.37 && mapRectangleGestureMGMT.yScale > 1.37{
+                    isScaled = true
+                    debugPrint("iPhone 12, iPhone 12Pro, iPhone 13, iPhone 13 Pro, iPhone 14, iPhone 14 Pro, iPhone 15, iPhone 15 Pro, iPhone 16, iPhone 16e is Scaled")
+                }
+            }*/
+            
+            // Commented out — now falls through to dynamic else block using baseMapScale
+            /*else if screenSize.width == 1284.0 && screenSize.height == 2778.0 || screenSize.width == 1290.0 && screenSize.height == 2796.0 {
+                if mapRectangleGestureMGMT.xScale > 1.5 && mapRectangleGestureMGMT.yScale > 1.5{
+                    isScaled = true
+                    debugPrint("iPhone 12ProMax, iPhone 13 Pro Max, iPhone 14 plus, iPhone 14 ProMax, iPhone 15 plus, iPhone 15 ProMax, iPhone 16 Plus is Scaled")
+                }
+            }*/
+            
+            // Commented out — now falls through to dynamic else block using baseMapScale
+            /*else if screenSize.width == 1206.0 && screenSize.height == 2622.0 /*|| screenSize.width == 1179.0 && screenSize.height == 2556.0*/ {
+                if mapRectangleGestureMGMT.xScale > 1.37 && mapRectangleGestureMGMT.yScale > 1.37{
+                    isScaled = true
+                    debugPrint("iPhone 16 PRO, iPhone 17, iPhone 17 PRO is Scaled")
+                }
+            }*/
+            
+            // Commented out — now falls through to dynamic else block using baseMapScale
+            /*else if screenSize.width == 1320.0 && screenSize.height == 2868.0 {
+                if mapRectangleGestureMGMT.xScale > 1.5 && mapRectangleGestureMGMT.yScale > 1.5{
+                    isScaled = true
+                    debugPrint("iPhone 16 ProMax, iPhone 17 ProMax is Scaled")
+                }
+            }*/
+            
+            
+            // Dynamic isScaled check for screens (750,1334), (1080,2340), (1125,2436) and default fallback.
+            // When the current scale exceeds baseMapScale, panning is enabled via isScaled flag.
+            // This flag is what handlePan checks before allowing the user to drag the map.
+            else{
+                if mapRectangleGestureMGMT.xScale > baseMapScale && mapRectangleGestureMGMT.yScale > baseMapScale {
+                    isScaled = true
+                    debugPrint("Dynamic isScaled check: base=\(baseMapScale) — iPhoneSE(2nd/3rd gen), 8, iPhone 12 mini, iPhone 13 mini, iPhone X, iPhone XS, iPhone 11 PRO is scaled")
+                }
+            }
+            
+            
+            let tolerance: CGFloat = 0.001
+
+            // iPad dynamic snap-back — uses baseMapScale/baseMapPosition set by setScaleAndIndepRenderingPositioningForAllIpads()
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                if abs(mapRectangleGestureMGMT.xScale - baseMapScale) < tolerance && abs(mapRectangleGestureMGMT.yScale - baseMapScale) < tolerance {
+                    isScaled = false
+                    mapRectangleGestureMGMT.position = baseMapPosition
+                    debugPrint("iPad dynamic snap-back: base=\(baseMapScale) — back to original position")
+                }
+            }
+            // iPhone snap-back — dynamic, uses baseMapScale/baseMapPosition set by setScaleAndIndepRenderingPositioningForAllIphones()
+            else {
+                if abs(mapRectangleGestureMGMT.xScale - baseMapScale) < tolerance && abs(mapRectangleGestureMGMT.yScale - baseMapScale) < tolerance {
+                    isScaled = false
+                    mapRectangleGestureMGMT.position = baseMapPosition
+                    debugPrint("iPhone dynamic snap-back: base=\(baseMapScale) — back to original position")
+                }
+            }
+
+            // Commented out — iPad and iPhone snap-back now both use dynamic baseMapScale/baseMapPosition above
+            /*switch (screenSize.width, screenSize.height) {
+                case (2048.0, 2732.0):
+                     if abs(mapRectangleGestureMGMT.xScale - 2.4) < tolerance && abs(mapRectangleGestureMGMT.yScale - 2.4) < tolerance {
+                        isScaled = false
+                        mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00)
+                        debugPrint("Pro12.9 etc is back to original position")
+                    }
+            case (1668.0, 2224.0), (1668.0,2388.0), (1620.0, 2160.0), (1640.0, 2360.0), (1668.0, 2420.0):
+                if abs(mapRectangleGestureMGMT.xScale - 2.1) < tolerance && abs(mapRectangleGestureMGMT.yScale - 2.1) < tolerance {
+                        isScaled = false
+                        mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00)
+                    debugPrint("iPad Air 11inch(M2 18.6) etc is back to original position")
+                    }
+            case (1536.0, 2048.0), (1488.0, 2266.0):
+                if abs(mapRectangleGestureMGMT.xScale - 1.85) < tolerance && abs(mapRectangleGestureMGMT.yScale - 1.85) < tolerance {
+                    isScaled = false
+                    mapRectangleGestureMGMT.position = CGPoint(x:self.size.width / 2, y:self.size.height / 2.00)
+                    debugPrint("iPad 6Gen, iPad Mini etc back to original position")
+                }
+            case (750.0, 1334.0), (1080.0, 2340.0),(1125.0, 2436.0), (1242.0, 2208.0), (828.0, 1792.0), (1242.0, 2688.0), (1170.0, 2532.0), (1179.0, 2556.0), (1284.0, 2778.0), (1290.0, 2796.0), (1206.0, 2622.0), (1320.0, 2868.0):
+                    if abs(mapRectangleGestureMGMT.xScale - baseMapScale) < tolerance && abs(mapRectangleGestureMGMT.yScale - baseMapScale) < tolerance {
+                        isScaled = false
+                        mapRectangleGestureMGMT.position = baseMapPosition
+                        debugPrint("iPhone dynamic snap-back")
+                    }
+                default:
+                    if abs(mapRectangleGestureMGMT.xScale - baseMapScale) < tolerance && abs(mapRectangleGestureMGMT.yScale - baseMapScale) < tolerance {
+                    isScaled = false
+                    mapRectangleGestureMGMT.position = baseMapPosition
+                        debugPrint("Default dynamic snap-back")
+                    }
+                    break
+            }*/
+
         }
     }
     
