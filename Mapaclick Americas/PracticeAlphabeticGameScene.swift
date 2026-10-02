@@ -58,6 +58,7 @@ class PracticeAlphabeticGameScene: SKScene{
     let penalty = 3//seconds added to timer when wrong node is pressed
     
     static var completedGame = false/**flow control variable for timer once its value is true allows for timer to stop, and transition to gameOverScene*/
+    var isTransitioningToGameOver = false//flow control var, becomes true once goToGameOverScene() is called from update so the transition only happens once
     
     var useLine2:Bool = false//used on splitTextIntoFields functions and touch function.(intrinsic to function mechanism, dev should not be too concerned with it)
     //var twoLineText: String = ""//used on splitTextIntoFields, this is the text passed to splitTextIntoFields functions
@@ -94,6 +95,11 @@ class PracticeAlphabeticGameScene: SKScene{
     var countriesNameBGScale: CGFloat = 1.10  // Scale for countriesNameBackground — set by device function, applied after resizeCountryNameBackground()
 
     var isAdShowing: Bool = false//Ads Logic
+
+    // Gesture recognizers added to the SKView in didMove — kept here so they can be removed when the scene leaves the view
+    var pinchRecognizer: UIPinchGestureRecognizer?
+    var tapRecognizer: UITapGestureRecognizer?
+    var panGestureRecognizer: UIPanGestureRecognizer?
     
     let screenSize = UIScreen.main.nativeBounds
     
@@ -223,7 +229,7 @@ class PracticeAlphabeticGameScene: SKScene{
         //addChildSKNodeToParentself(children: containerNode)
         
         //set an call hand gesture recognizers
-        let pinchRecognizer: UIPinchGestureRecognizer = UIPinchGestureRecognizer(target:self, action: #selector(self.handlePinchFrom(_:)))
+        /*let pinchRecognizer: UIPinchGestureRecognizer = UIPinchGestureRecognizer(target:self, action: #selector(self.handlePinchFrom(_:)))
         self.view!.addGestureRecognizer(pinchRecognizer)
         
         let tapRecognizer: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.handleTapFrom(_:)))
@@ -232,7 +238,21 @@ class PracticeAlphabeticGameScene: SKScene{
         
         let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.handlePan(_:)))
         // Add the gesture recognizer to the scene's view
-        self.view!.addGestureRecognizer(panGestureRecognizer)
+        self.view!.addGestureRecognizer(panGestureRecognizer)*/
+        // Recognizers are stored as properties so removeGameGestureRecognizers() can detach them when the scene leaves the view
+        let pinch = UIPinchGestureRecognizer(target:self, action: #selector(self.handlePinchFrom(_:)))
+        self.view!.addGestureRecognizer(pinch)
+        pinchRecognizer = pinch
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.handleTapFrom(_:)))
+        tap.numberOfTapsRequired = 1
+        self.view!.addGestureRecognizer(tap)
+        tapRecognizer = tap
+
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(self.handlePan(_:)))
+        // Add the gesture recognizer to the scene's view
+        self.view!.addGestureRecognizer(pan)
+        panGestureRecognizer = pan
         
         
             
@@ -254,6 +274,27 @@ class PracticeAlphabeticGameScene: SKScene{
         //     showAdIfNeeded()
         // }
 
+    }
+    //Called right before the scene is removed from the view(exit to StartMenu or transition to GameOverScene)
+    override func willMove(from view: SKView) {
+        removeGameGestureRecognizers()
+    }
+
+    //Detaches this scene's tap, pinch and pan recognizers from the SKView. The SKView is shared by every scene, so without this
+    //each new game would stack three more recognizers and the old ones would keep pointing at a finished scene
+    func removeGameGestureRecognizers() {
+        if let pinch = pinchRecognizer {
+            view?.removeGestureRecognizer(pinch)
+        }
+        if let tap = tapRecognizer {
+            view?.removeGestureRecognizer(tap)
+        }
+        if let pan = panGestureRecognizer {
+            view?.removeGestureRecognizer(pan)
+        }
+        pinchRecognizer = nil
+        tapRecognizer = nil
+        panGestureRecognizer = nil
     }
     //Ads Logic
     @objc func adWillShow() {
@@ -1928,7 +1969,12 @@ class PracticeAlphabeticGameScene: SKScene{
         /** This block  will execute when completedGame equals true(meaning all nodes were correctly identified), the function below will get gameOverScene. The reason to place here the game transition to gameOverScene is due Touch function needs "space" in order to perform without much lagging as scene transitioning and
          Touch function both require a lot of resouces that can compromise the flow of the game(so basically thats why the scene transition is not placed on Touch function)*/
         
-        if PracticeAlphabeticGameScene.completedGame == true{
+        /*if PracticeAlphabeticGameScene.completedGame == true{
+            goToGameOverScene()
+        }*/
+        //isTransitioningToGameOver makes sure the transition is requested only once instead of on every frame while the 1.5s fade runs
+        if PracticeAlphabeticGameScene.completedGame == true && isTransitioningToGameOver == false{
+            isTransitioningToGameOver = true
             goToGameOverScene()
         }
         
@@ -2021,6 +2067,7 @@ class PracticeAlphabeticGameScene: SKScene{
     func goToGameOverScene(){
         musicPlayer?.stop()
         // AdManager.shared.removeBanner()
+        removeGameGestureRecognizers()//detach before the 1.5s fade so taps during the transition don't reach the finished game
         let gameOverScene = GameOverScene(size: self.size)
         let transition = SKTransition.fade(withDuration: 1.5)
         self.view?.presentScene(gameOverScene, transition: transition)
@@ -2074,11 +2121,24 @@ class PracticeAlphabeticGameScene: SKScene{
         }
     }*/
     
-    func paintNode(spriteNode:SKSpriteNode){
+    /*func paintNode(spriteNode:SKSpriteNode){
         spriteNode.colorBlendFactor = 0.8
         spriteNode.color = UIColor.init(red: 0, green: 1, blue: 0.949, alpha: 1.0)
         
         //spriteNode.physicsBody = nil
+    }*/
+    func paintNode(spriteNode:SKSpriteNode){
+        let greenColor = UIColor.init(red: 0, green: 1, blue: 0.949, alpha: 1.0)
+        spriteNode.colorBlendFactor = 0.8
+        spriteNode.color = greenColor
+        //spriteNode.physicsBody = nil
+        // If the node has children (e.g. Lesser Antilles Arc), color them all green too
+        for child in spriteNode.children {
+            if let childSprite = child as? SKSpriteNode {
+                childSprite.colorBlendFactor = 0.8
+                childSprite.color = greenColor
+            }
+        }
     }
     
     func playCorrectSound(){
