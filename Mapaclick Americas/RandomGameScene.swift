@@ -861,11 +861,11 @@ class RandomGameScene: SKScene{
                         let spritenode = touchedNode?.node as! SKSpriteNode//pass touchedNode node attribute to spritenode, to apply changes
                         //spritenode.physicsBody = nil LINE WAS COMMENTED DUE PHYSICS ARE NEEDED A LONG THE GAME TO CATCH THE WRONG ANSWERED NODES THAT HAVE BEEN ALREADY IDENTIFIED AS IN ANDROID GAME.
                         playCorrectSound()
-                        setLabelForMunicipioNameAndAddToNode(nodeSprite: spritenode)
+                        setLabelForCountryNameAndAddToNode(nodeSprite: spritenode)
                         //playCorrectSound()
                         paintNode(spriteNode: spritenode)//color SKSpriteNode green
                         /**Set labels and add them to map texture(node)*/
-                        //setLabelForMunicipioNameAndAddToNode(nodeSprite: spritenode)
+                        //setLabelForCountryNameAndAddToNode(nodeSprite: spritenode)
                         //playCorrectSound()
                         /**Element identified is removed from names array, Evaluates for game complition and removal of Skip button*/
                         removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval()
@@ -931,7 +931,7 @@ class RandomGameScene: SKScene{
                         // Proceed with actions on the spriteNode
                         playCorrectSound()
                         paintNode(spriteNode: spriteNode)
-                        setLabelForMunicipioNameAndAddToNode(nodeSprite: spriteNode)
+                        setLabelForCountryNameAndAddToNode(nodeSprite: spriteNode)
                         removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval()
                         setNewCountryNameToLookUp()
                         addToScoreCountWriteToLabel()
@@ -949,7 +949,7 @@ class RandomGameScene: SKScene{
                                 //spriteNode.physicsBody = nil // Remove physics if needed
                                 playCorrectSound()
                                 paintNode(spriteNode: spriteNode)
-                                setLabelForMunicipioNameAndAddToNode(nodeSprite: spriteNode)
+                                setLabelForCountryNameAndAddToNode(nodeSprite: spriteNode)
                                 removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval()
                                 setNewCountryNameToLookUp()
                                 addToScoreCountWriteToLabel()
@@ -1020,10 +1020,10 @@ class RandomGameScene: SKScene{
                       let spritenode = touchedNode?.node as! SKSpriteNode//pass touchedNode node attribute to spritenode, to apply changes
                       spritenode.physicsBody = nil
                       playCorrectSound()
-                      setLabelForMunicipioNameAndAddToNode(nodeSprite: spritenode)
+                      setLabelForCountryNameAndAddToNode(nodeSprite: spritenode)
                       paintNode(spriteNode: spritenode)//color SKSpriteNode green
                       /**Set labels and add them to map texture(node)*/
-                      //setLabelForMunicipioNameAndAddToNode(nodeSprite: spritenode)
+                      //setLabelForCountryNameAndAddToNode(nodeSprite: spritenode)
                       /**Element identified is removed from names array, Evaluates for game complition and removal of Skip button*/
                       removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval()
                       /**set new municipio to look after*/
@@ -1736,7 +1736,7 @@ class RandomGameScene: SKScene{
                 paintNode(spriteNode: spritenode)//color SKSpriteNode green
                 playCorrectSound()
                 /**Set labels and add them to map texture(node)*/
-                setLabelForMunicipioNameAndAddToNode(nodeSprite: spritenode)
+                setLabelForCountryNameAndAddToNode(nodeSprite: spritenode)
                 /**Element identified is removed from names array, Evaluates for game complition and removal of Skip button*/
                 removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval()
                 /**set new municipio to look after*/
@@ -1778,6 +1778,13 @@ class RandomGameScene: SKScene{
         }
     }
     
+    //following function sets labels for country names and adds them to the map node(country map node) once it is identified
+    //Labels live in InitSetMapNodes so all game scenes and GameOverScene draw the same labels(same as AlphabeticGameScene)
+    func setLabelForCountryNameAndAddToNode(nodeSprite:SKSpriteNode){
+        InitSetMapNodes().addCountryNameLabel(to: nodeSprite)
+    }
+
+    /*// OLD PR municipio labels(big white labels) - replaced by shared InitSetMapNodes.addCountryNameLabel above, kept for reference
     //following function sets labels for municio names using one or two labels and adds labels to map node(municipio map node)
    func setLabelForMunicipioNameAndAddToNode(nodeSprite:SKSpriteNode){
           
@@ -2427,6 +2434,7 @@ class RandomGameScene: SKScene{
             nodeSprite.addChild(locationNameLabel)//adds label to map node
           }
       }
+    */
     
     //sets attributes for label to use with one word municipio names
     func setOneLineMunicipioNameLabel(Oneline:SKLabelNode){
