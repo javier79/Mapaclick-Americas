@@ -27,25 +27,25 @@ class ViewController: UIViewController {
         skView.showsPhysics = true//enables the usage of SKPhysicsBody properties,without this SKPhysicsBody will not work
         //skView.showsNodeCount = true
 
-//        if UIDevice.current.userInterfaceIdiom == .pad {
-//            let alphabeticGameScene = AlphabeticGameScene(size: view.bounds.size)
-//            skView.presentScene(alphabeticGameScene)
-//        } else {
-//            let alphabeticGameScene = AlphabeticGameScene(size: CGSize(width: 375, height: 667))
-//            alphabeticGameScene.scaleMode = .aspectFill
-//            skView.presentScene(alphabeticGameScene)
-//        }
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            let alphabeticGameScene = AlphabeticGameScene(size: view.bounds.size)
+            skView.presentScene(alphabeticGameScene)
+        } else {
+            let alphabeticGameScene = AlphabeticGameScene(size: CGSize(width: 375, height: 667))
+            alphabeticGameScene.scaleMode = .aspectFill
+            skView.presentScene(alphabeticGameScene)
+        }
 
         //TEMPORARY for testing the PracticeAlphabeticGameScene port. Flag must be set before the scene is created so country name labels get added to the map.
-        StartMenuScene.playPracticeAlphabeticGame = true
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            let practiceAlphabeticGameScene = PracticeAlphabeticGameScene(size: view.bounds.size)
-            skView.presentScene(practiceAlphabeticGameScene)
-        } else {
-            let practiceAlphabeticGameScene = PracticeAlphabeticGameScene(size: CGSize(width: 375, height: 667))
-            practiceAlphabeticGameScene.scaleMode = .aspectFill
-            skView.presentScene(practiceAlphabeticGameScene)
-        }
+//        StartMenuScene.playPracticeAlphabeticGame = true
+//        if UIDevice.current.userInterfaceIdiom == .pad {
+//            let practiceAlphabeticGameScene = PracticeAlphabeticGameScene(size: view.bounds.size)
+//            skView.presentScene(practiceAlphabeticGameScene)
+//        } else {
+//            let practiceAlphabeticGameScene = PracticeAlphabeticGameScene(size: CGSize(width: 375, height: 667))
+//            practiceAlphabeticGameScene.scaleMode = .aspectFill
+//            skView.presentScene(practiceAlphabeticGameScene)
+//        }
     }
 
 
