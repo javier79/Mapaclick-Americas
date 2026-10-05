@@ -27,24 +27,24 @@ class ViewController: UIViewController {
         skView.showsPhysics = true//enables the usage of SKPhysicsBody properties,without this SKPhysicsBody will not work
         //skView.showsNodeCount = true
 
-//        if UIDevice.current.userInterfaceIdiom == .pad {
-//            let alphabeticGameScene = AlphabeticGameScene(size: view.bounds.size)
-//            skView.presentScene(alphabeticGameScene)
-//        } else {
-//            let alphabeticGameScene = AlphabeticGameScene(size: CGSize(width: 375, height: 667))
-//            alphabeticGameScene.scaleMode = .aspectFill
-//            skView.presentScene(alphabeticGameScene)
-//        }
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            let alphabeticGameScene = AlphabeticGameScene(size: view.bounds.size)
+            skView.presentScene(alphabeticGameScene)
+        } else {
+            let alphabeticGameScene = AlphabeticGameScene(size: CGSize(width: 375, height: 667))
+            alphabeticGameScene.scaleMode = .aspectFill
+            skView.presentScene(alphabeticGameScene)
+        }
 
         //TEMPORARY for testing the RandomGameScene port.
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            let randomGameScene = RandomGameScene(size: view.bounds.size)
-            skView.presentScene(randomGameScene)
-        } else {
-            let randomGameScene = RandomGameScene(size: CGSize(width: 375, height: 667))
-            randomGameScene.scaleMode = .aspectFill
-            skView.presentScene(randomGameScene)
-        }
+//        if UIDevice.current.userInterfaceIdiom == .pad {
+//            let randomGameScene = RandomGameScene(size: view.bounds.size)
+//            skView.presentScene(randomGameScene)
+//        } else {
+//            let randomGameScene = RandomGameScene(size: CGSize(width: 375, height: 667))
+//            randomGameScene.scaleMode = .aspectFill
+//            skView.presentScene(randomGameScene)
+//        }
 
         //TEMPORARY for testing the PracticeAlphabeticGameScene port. Flag must be set before the scene is created so country name labels get added to the map.
 //        StartMenuScene.playPracticeAlphabeticGame = true
