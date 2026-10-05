@@ -1766,10 +1766,25 @@ class RandomGameScene: SKScene{
     
     
 
+    /*// OLD PR paintNode - only colored the node itself, not its children
     func paintNode(spriteNode:SKSpriteNode){
         spriteNode.color = UIColor.init(red: 0, green: 1, blue: 0.949, alpha: 1.0)
         spriteNode.colorBlendFactor = 1.0
         //spriteNode.physicsBody = nil
+    }*/
+    //same as AlphabeticGameScene
+    func paintNode(spriteNode:SKSpriteNode){
+        let greenColor = UIColor.init(red: 0, green: 1, blue: 0.949, alpha: 1.0)
+        spriteNode.colorBlendFactor = 0.8
+        spriteNode.color = greenColor
+        //spriteNode.physicsBody = nil
+        // If the node has children (e.g. Lesser Antilles Arc), color them all green too
+        for child in spriteNode.children {
+            if let childSprite = child as? SKSpriteNode {
+                childSprite.colorBlendFactor = 0.8
+                childSprite.color = greenColor
+            }
+        }
     }
     
     func playCorrectSound(){
