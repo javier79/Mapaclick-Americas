@@ -37,11 +37,20 @@ class RandomGameScene: SKScene{
     let timerBackgroundTwo = GameSceneObjects().timerBackGroundTwo()/*Background for timer(At one time the timer used two different size backgrounds, but later i opted out of doing that for eficiency and kept
     the bigger background(timerBackgroundTwo) as timer's only background along its life cycle */
     
-    let municipioNameLabel = GameSceneObjects().labelForCountryNames()//Label rendering country name to look up, Used in more than one function
+    let countryNameLabel = GameSceneObjects().labelForCountryNames()//Label rendering country name to look up, Used in more than one function
+    // Dynamic country name background - resizes automatically based on text width(same as AlphabeticGameScene)
+    let countriesNameBackground: SKSpriteNode = {
+        let node = SKSpriteNode()
+        node.position = CGPoint(x: 0.5, y: -0.5)
+        node.name = "CountriesNameBackground"
+        return node
+    }()
+    /*// Old PR hardcoded backgrounds - kept for reference
     let municipiosNameBackground = GameSceneObjects().labelCountriesNameBackground()//Background for most(shorter) country names. Used in more than one function
     let municipiosNameBackgroundTwo = GameSceneObjects().labelCountriesNameBackgroundTwo()//Background for longer country names. Used in more than one function
     let municipiosNameBackgroundThree = GameSceneObjects().labelCountriesNameBackgroundThree()
     let municipiosNameBackgroundFour = GameSceneObjects().labelCountriesNameBackgroundFour()
+    */
     
     var renderTime: TimeInterval = 0.0//marks the time being played to be compared with currentTime, only used on update(timer function)
     let changeTime: TimeInterval = 1//adds(update) to renderTime in order to keep renderTime running, only used on update(imer function)
@@ -61,16 +70,22 @@ class RandomGameScene: SKScene{
     var twoLineText: String = ""//se usa solo en las dos funciones splitTextIntoFields puedo declararla en ambas funciones de manera local
     var useLine2:Bool = false//se usa en mas de una funcion*/
 
+    /** Array contains country names in alphabetical order, matching the node names in InitSetMapNodes.
+     Used to display the country name the player must find, picked at random.(same list as AlphabeticGameScene)*/
+    var countries_names_array = ["Argentina", "Belize", "Bolivia", "Brazil", "Canada", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominican Republic", "Ecuador", "El Salvador", "French Guiana", "Greenland", "Guatemala", "Guyana", "Haiti", "Honduras", "Jamaica", "Lesser Antilles", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Puerto Rico", "Suriname", "The Bahamas", "United States", "Uruguay", "Venezuela"]
+    /*// Old PR municipios array - kept for reference
     /** Array includes Adjuntas although it' is written from the function that sets the label for municipios to look up, this is due  if adjuntas is skipped when the array reach the end to go back to index 0, then it gets Adjuntas.
      This array contain the text elements for the municipios to look up*/
     var municipios_names_array = ["Adjuntas", "Aguada", "Aguadilla", "Aguas Buenas", "Aibonito", "Arecibo", "Arroyo", "Añasco", "Barceloneta", "Barranquitas", "Bayamón", "Cabo Rojo", "Caguas", "Camuy", "Canóvanas", "Carolina", "Cataño", "Cayey", "Ceiba", "Ciales", "Cidra", "Coamo", "Comerío", "Corozal", "Culebra", "Dorado", "Fajardo", "Florida", "Guayama", "Guayanilla", "Guaynabo","Gurabo", "Guánica", "Hatillo", "Hormigueros", "Humacao", "Isabela", "Jayuya", "Juana Díaz", "Juncos", "Lajas", "Lares", "Las Marías", "Las Piedras", "Loíza", "Luquillo", "Manatí", "Maricao", "Maunabo", "Mayagüez", "Moca", "Morovis", "Naguabo", "Naranjito", "Orocovis", "Patillas", "Peñuelas", "Ponce", "Quebradillas", "Rincón", "Rio Grande", "Sabana Grande", "Salinas", "San Germán", "San Juan", "San Lorenzo", "San Sebastián", "Santa Isabel", "Toa Alta", "Toa Baja", "Trujillo Alto", "Utuado", "Vega Alta", "Vega Baja", "Vieques", "Villalba", "Yabucoa", "Yauco"]
+    */
 
     //var touchedNode: SKPhysicsBody!//holds touched node, declared at the top to be accesed by accesory functions out of Touch function
     var fail: Bool!//flow control var allow when true for penalty to be added at timer funtion. Used on more than one funtion
     var currentIndex: Int = 0 //refers to index currently diplayed on municipio name label declared at the top to be accesed by accesory functions
     var pressSKipButton:Bool = false//Flow control variables when true allows timer to add 15 penalty
     var scoreCount:Int = 0//variable represent the number of municipios identified rendered in the control bar to the right
-    let totalScoreCount:String = "/78"
+    //let totalScoreCount:String = "/78"
+    let totalScoreCount:String = "/31"//must match countries_names_array.count
     
     let correctSound = SKAction.playSoundFileNamed("351566__bertrof__game-sound-correct-organic-violin", waitForCompletion: false)
     let incorrectSound = SKAction.playSoundFileNamed("351565__bertrof__game-sound-incorrect-organic-violin", waitForCompletion: false)
@@ -84,6 +99,13 @@ class RandomGameScene: SKScene{
     var randomIndex: Int = 0
 
     var isScaled = false
+
+    // Dynamic zoom/pan properties(same as AlphabeticGameScene) — set once during didMove by the setScaleAndIndepRendering... positioning functions,
+    // then referenced by handlePinchFrom (zoom clamping, isScaled detection, snap-back) and handlePan (zoom-aware pan boundaries).
+    var baseMapScale: CGFloat = 1.0       // The default/minimum scale the map starts at (can't zoom out past this)
+    var baseMapPosition: CGPoint = .zero  // The default position the map snaps back to when zoomed out to baseMapScale
+    var maxZoomScale: CGFloat = 3.0       // The maximum zoom-in limit, computed as baseMapScale * 5.0 by the positioning functions
+    var countriesNameBGScale: CGFloat = 1.10  // Scale for countriesNameBackground — set by device function, applied after resizeCountryNameBackground()
     
     var isAdShowing: Bool = false//Ads Logic
     
@@ -94,6 +116,8 @@ class RandomGameScene: SKScene{
         // NotificationCenter.default.addObserver(self, selector: #selector(adWillShow), name: AdManager.adWillShowNotification, object: nil)
         // NotificationCenter.default.addObserver(self, selector: #selector(adDismissed), name: AdManager.adDismissedNotification, object: nil)
         backgroundNode = gameSceneObjects.createSceneBackground(scene: self)
+
+        labelScores.text = "0" + totalScoreCount//overrides labelForScores() default text so initial total matches this scene
         /*Statement below is commented as a background node was implemented for the scene with the same color*/
         //self.backgroundColor = UIColor.init(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0)//blue background that resembles the ocean
         
@@ -105,22 +129,35 @@ class RandomGameScene: SKScene{
         /**The following  objects are the parent for all rendering objects, class positioning attributers are applied in order for objects to render the same independent of the screen size, In the case of containerNode it's positioning is set  based on its parent
          timerBackgroundTwo. The reason for not giving containerNode class positioning was due when class attributes were applied to containerNode it would render different in devices with smaller screen size(maybe something im not aware about, or a glitch of some kind).*/
         //containerNode.zPosition = -1
-        containerNode.position = CGPoint(x:-280, y:-190)//CGPoint(x:self.size.width/2 - 285, y:self.size.height/2 - 175) /*CGPoint(x:-275 , y:-75 /*15*/)*//**Sknode containing(children) map sprites, desecheo cover(node whose only job is to hid desecheo island, rectangular frames)*/
+        containerNode.setScale(1.10) // Scaled down to give margin from rectangle edges(same as AlphabeticGameScene)
+        containerNode.position = CGPoint(x:-237, y:-331) // Americas portrait map position inside the rectangle(same as AlphabeticGameScene)
+        //containerNode.position = CGPoint(x:-280, y:-190)//CGPoint(x:self.size.width/2 - 285, y:self.size.height/2 - 175) /*CGPoint(x:-275 , y:-75 /*15*/)*//**Sknode containing(children) map sprites, desecheo cover(node whose only job is to hid desecheo island, rectangular frames)*/
         containerNode.name = "containerNode"
         //timerBackgroundTwo.position = CGPoint(x:self.size.width / 2/*333.5*/, y:self.size.height / 6)/**parent to labelTimer*/
         
         controlPanelSKSpriteNode.zPosition = 1//Set to one in order for the map to zoom and remain behind
-        controlPanelSKSpriteNode.size = CGSize(width:self.size.width - 1, height: 50)
+        //controlPanelSKSpriteNode.size = CGSize(width:self.size.width - 1, height: 50)
+        controlPanelSKSpriteNode.size = CGSize(width:self.size.width - 1, height:55)//same as AlphabeticGameScene, device functions resize it afterwards
         controlPanelSKSpriteNode.name = "controlPanelSKSpriteNode"
         //controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y:self.size.height / 16.5/*25*/)
         
-        getFirstRandomMunicipioNameToLookUp()//Function gets first random municipio name and overwrites text attributes from TestClass().labelForMunicipioNames()(base attributes)
+        //getFirstRandomMunicipioNameToLookUp()//moved below as getFirstRandomCountryNameToLookUp(), it must run after the device function sets countriesNameBGScale
+        //getFirstRandomMunicipioNameToLookUp()//Function gets first random municipio name and overwrites text attributes from TestClass().labelForMunicipioNames()(base attributes)
         //randomIndex = Int.random(in:0...77)//gets random index for first municipio name to look up
-        //municipioNameLabel.text = municipios_names_array[randomIndex]//first municipio name to look up
-        //municipioNameLabel = labelForMunicipioNamesRandomGame(NameMunicipioLabel: municipioNameLabel)
+        //countryNameLabel.text = municipios_names_array[randomIndex]//first municipio name to look up
+        //countryNameLabel = labelForMunicipioNamesRandomGame(NameMunicipioLabel: countryNameLabel)
         
         //The following block reads device screen size in points, based on screen size a function will execute to asign scaling and positioning attributes
         debugPrint("Screen size: \(screenSize)")
+        //Same device branching as AlphabeticGameScene: one dynamic function for all iPads and one for all iPhones
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            debugPrint("iPad detected — universal dynamic rendering")
+            setScaleAndIndepRenderingPositioningForAllIpads()
+        } else {
+            debugPrint("All iPhones — universal rendering via fixed scene size (375x667)")
+            setScaleAndIndepRenderingPositioningForAllIphones()
+        }
+        /*// Old PR per-screen-size switch - kept for reference
         switch (screenSize.width, screenSize.height) {
             
             case (2048.0, 2732.0):
@@ -164,22 +201,36 @@ class RandomGameScene: SKScene{
             default:
                setScaleAndIndepRenderingPositioningForSmallScreenSizes()//This line will catch any device which screen measure is none of the above
                 break
-        }
-        
+        }*/
+
+        /*// Old PR map background(added to self, sized from the gesture node)
         mapRectangleBackground.size = mapRectangleGestureMGMT.size
         mapRectangleBackground.position = mapRectangleGestureMGMT.position
+        mapRectangleBackground.name = "mapRectangleBackground"*/
+        // Map background setup(same as AlphabeticGameScene): blue, child of mapRectangleGestureMGMT so it zooms/pans with the map
+        // Remove texture so .size controls dimensions directly
+        mapRectangleBackground.texture = nil
+        mapRectangleBackground.color = UIColor.init(red: 0.2588, green: 0.7608, blue: 1.0, alpha: 1.0)
+        mapRectangleBackground.colorBlendFactor = 1.0
+        mapRectangleBackground.xScale = 1.0
+        mapRectangleBackground.yScale = 1.0
+        // Sized so the gesture node's yellow stroke shows as a visible border around the background
+        mapRectangleBackground.size = CGSize(width: 385.0, height: 575.0)
+        mapRectangleBackground.position = CGPoint.zero
         mapRectangleBackground.name = "mapRectangleBackground"
-        
+
         self.addChild(backgroundNode)
-        self.addChild(mapRectangleBackground)
+        //self.addChild(mapRectangleBackground)
         /**Following objects are related to goldBackground SKSPriteNode*/
-        //Attention the following two statements were commented due municipioNamesBackground and municipioNameLabel are added at getFirstRandomMunicipioNameToLookUp()
-        //addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackground, children: municipioNameLabel)
+        //Attention the following two statements were commented due municipioNamesBackground and countryNameLabel are added at getFirstRandomMunicipioNameToLookUp()
+        //addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackground, children: countryNameLabel)
         //addChildSKSpriteNodeToParentSKSpriteNode(parent: goldBackgroundSKSpriteNode, children: municipiosNameBackground)
-        addChildSKLabelNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: labelScores)
+        //addChildSKLabelNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: labelScores)//labelScores is now added to self by the device functions(next to the timer)
+        getFirstRandomCountryNameToLookUp()//picks first random country, adds countryNameLabel/countriesNameBackground to the control panel and sizes the background
         addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: skipButton)
         addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: exitRedButton)
         addChildSKSpriteNodeToParentself(children: controlPanelSKSpriteNode)
+        addChildSKSpriteNodeToParentSKSpriteNode(parent:mapRectangleGestureMGMT, children:mapRectangleBackground)
         addChildSKNodeToParentSKSpriteNode(parent:mapRectangleGestureMGMT, children:containerNode)
         //containerSKSPriteNode.addChild(containerNode)
         addChildSKSpriteNodeToParentself(children:mapRectangleGestureMGMT)
@@ -210,10 +261,10 @@ class RandomGameScene: SKScene{
         // FOR TESTING ONLY - REMOVE BEFORE RELEASE
         //TutorialManager.resetTutorialCount()
         
-        // Show tutorial if needed (max 3 times)
-        if TutorialManager.shouldShowTutorial() {
-                    showTutorial()
-        }
+        // Show tutorial if needed(commented out during development, tutorial is addressed at the end - same as AlphabeticGameScene)
+        // if TutorialManager.shouldShowTutorial() {
+        //             showTutorial()
+        // }
         
         // //Ads Logic
         // if !TutorialManager.shouldShowTutorial() {
@@ -258,6 +309,7 @@ class RandomGameScene: SKScene{
     //     self.run(SKAction.sequence([waitAction, showAction]))
     // }
     
+    /*// OLD PR per-device layout functions(fixed screen sizes, landscape) - replaced by the two dynamic functions below, copied from AlphabeticGameScene
     //Execute attributes for scaling and positioning based on device screen size
     /*func setScaleAndIndepRenderingPositioningForIpadsLargeScreenSizes(){
         //debugPrint("Set StartScene gamePlay objts scaling and positioning for: iPads Pro12.9(3gen), Pro12.9(4gen), Pro12.9(5gen), Pro12.9(6gen) IpadsLargeScreenSizes scaling and positioning func")
@@ -584,8 +636,160 @@ class RandomGameScene: SKScene{
         municipiosNameBackgroundThree.position = CGPoint(x:0.5/*goldenBackground().size.width/200*/, y:2.0/*goldenBackground().size.height/2 * 0.18*/)
         municipiosNameBackgroundFour.position = CGPoint(x:0.5/*goldenBackground().size.width/200*/, y:2.0/*goldenBackground().size.height/2 * 0.18*/)
     }
-    
-    
+    */
+
+    //Execute attributes for scaling and positioning based on device screen size
+    func setScaleAndIndepRenderingPositioningForAllIpads(){
+        debugPrint("iPad Air 11inch(M2 18.6), iPad Air 11inch(M3 18.6), iPad Pro 11inch(1st-4th gen 18.6), iPad 11 inch(M4 18.6), iPad Air(3rd gen 18.6), iPad Air(4th-5th gen 18.6), iPad(7th-9th gen 18.6), Ipad 10th Gen(18.6), iPad A16(11 Gen 18.6), iPad Pro 10.5 enters scaling and positioning function")
+
+        // Dynamic map positioning — same approach as iPhone function
+        let mapWidth: CGFloat = 390.0
+        let mapHeight: CGFloat = 580.0
+        let topMargin: CGFloat = 50.0
+        let bottomMargin: CGFloat = 20.0  // clears home indicator zone on modern iPads
+        let horizontalMargin: CGFloat = 36.0
+        let gap: CGFloat = 4.0  // tiny gap between stacked elements
+
+        // Control panel sizing — lifted above home indicator
+        let panelHeight: CGFloat = 70.0
+        controlPanelSKSpriteNode.size = CGSize(width: self.size.width - (horizontalMargin * 2), height: panelHeight)
+        controlPanelSKSpriteNode.position = CGPoint(x: self.size.width / 2, y: bottomMargin + (panelHeight / 2))  // 20 + 35 = 55
+        let controlPanelTopY = controlPanelSKSpriteNode.position.y + (controlPanelSKSpriteNode.size.height / 2)  // = 70
+
+        // Timer sits just above control panel with a gap
+        timerBackgroundTwo.setScale(2.00)
+        let timerHalfHeight: CGFloat = (17.0 * 2.00) / 2.0  // base height 17 × scale 2.0, halved
+        let timerCenterY = controlPanelTopY + gap + timerHalfHeight - 2.5  // sits on top of panel, lowered 2.5pt
+        timerBackgroundTwo.position = CGPoint(x: self.size.width / 2, y: timerCenterY)
+        let timerTopY = timerCenterY + timerHalfHeight
+
+        // Golden rectangle sits just above timer with a gap
+        let mapBottomY = timerTopY + gap
+        let availableWidth = self.size.width - (horizontalMargin * 2)
+        let availableHeight = self.size.height - mapBottomY - topMargin
+        let scaleX = availableWidth / mapWidth
+        let scaleY = availableHeight / mapHeight
+        let mapScale = min(scaleX, scaleY)
+        let centerX = self.size.width / 2
+        let centerY = mapBottomY + (mapScale * mapHeight / 2) + 2.0  // position so bottom edge aligns, nudged 2.0pt up
+        mapRectangleGestureMGMT.position = CGPoint(x: centerX, y: centerY)
+        mapRectangleGestureMGMT.setScale(mapScale)
+
+        baseMapScale = mapScale
+        baseMapPosition = CGPoint(x: centerX, y: centerY)
+        maxZoomScale = mapScale * 5.0
+
+        let goldenRectWidth = mapRectangleGestureMGMT.size.width
+        debugPrint("iPad Medium — goldenRectWidth: \(goldenRectWidth), mapScale: \(mapScale), gestureNode.size: \(mapRectangleGestureMGMT.size)")
+        // Resize control panel width to match golden rect
+        controlPanelSKSpriteNode.size = CGSize(width: goldenRectWidth, height: 70)
+
+        exitRedButton.setScale(1.90)  // was 1.60 — slightly larger for taller panel
+        exitRedButton.position = CGPoint(x: -230, y: 0)
+
+        skipButton.setScale(1.90)  // was 1.60 — matches exit button
+        skipButton.position = CGPoint(x: 230, y: 0)
+
+        countriesNameBGScale = 1.50  // restored original
+        countriesNameBackground.position = CGPoint(x: 0, y: 0)
+
+        labelScores.fontSize = 24  // scaled up for iPad
+        // Place above Saltar button (skipButton is at x: +230 relative to controlPanel center)
+        let skipButtonX = controlPanelSKSpriteNode.position.x + 230
+        labelScores.position = CGPoint(x: skipButtonX, y: timerCenterY - 11)
+        labelScores.zPosition = 1
+        if labelScores.parent == nil {
+            self.addChild(labelScores)
+        }
+
+        // Cover Hawaii islands with a blue rectangle matching the scene background
+        // Added as child of mapRectangleGestureMGMT so it zooms/pans with the map
+        let goldenRectLeftEdge = centerX - (goldenRectWidth / 2)
+        let coverWidth = goldenRectLeftEdge  // fills from screen left to golden rect edge
+        // Convert scene-space size to map-node-space by dividing by mapScale (the parent's scale)
+        let hawaiiCover = SKSpriteNode(color: UIColor(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0), size: CGSize(width: coverWidth / mapScale, height: 55))
+        hawaiiCover.anchorPoint = CGPoint(x: 0, y: 0.5)  // anchor at left edge
+        // Convert scene position to map node's local coordinates
+        let scenePos = CGPoint(x: 0, y: centerY + (30 * mapScale))
+        let localPos = mapRectangleGestureMGMT.convert(scenePos, from: self)
+        hawaiiCover.position = localPos
+        hawaiiCover.zPosition = 2  // above the map
+        hawaiiCover.name = "hawaiiCover"
+        if mapRectangleGestureMGMT.childNode(withName: "hawaiiCover") == nil {
+            mapRectangleGestureMGMT.addChild(hawaiiCover)
+        }
+    }
+    //Execute attributes for scaling and positioning based on device screen size
+    func setScaleAndIndepRenderingPositioningForAllIphones(){
+        debugPrint("Default Settings and iPhoneSE(second gen 18.5), iPhoneSE(third gen 18.5), 8, iPhone 12 mini(18.5), iPhone 13 mini(18.5), iPhone X, iPhone XS(18.5) ,iPhone 11 PRO(18.5) enter scaling and positioning func")
+        
+        // Portrait Americas map positioning for small screens
+        let mapWidth: CGFloat = 390.0
+        let mapHeight: CGFloat = 580.0
+        let controlPanelHeight: CGFloat = 60.0
+        let topMargin: CGFloat = 50.0
+        let horizontalMargin: CGFloat = 36.0
+        let availableWidth = self.size.width - (horizontalMargin * 2)
+        let availableHeight = self.size.height - controlPanelHeight - topMargin
+        let scaleX = availableWidth / mapWidth
+        let scaleY = availableHeight / mapHeight
+        let mapScale = min(scaleX, scaleY)
+        let centerX = self.size.width / 2
+        let centerY = controlPanelHeight + (availableHeight / 2)
+        mapRectangleGestureMGMT.position = CGPoint(x: centerX, y: centerY)
+        mapRectangleGestureMGMT.setScale(mapScale)
+
+        // Store the computed scale and position so handlePinchFrom and handlePan can reference them.
+        // This avoids hardcoding per-device values in multiple places — the positioning function is
+        // the single source of truth, and zoom/pan logic reads from these properties.
+        baseMapScale = mapScale
+        baseMapPosition = CGPoint(x: centerX, y: centerY)
+        maxZoomScale = mapScale * 5.0  // User can zoom up to 5x the base size
+
+        controlPanelSKSpriteNode.position = CGPoint(x:self.size.width / 2, y: (controlPanelHeight / 2) - 1)
+
+        // Center timer between control panel top and map rectangle bottom
+        let mapBottomY = centerY - (mapScale * mapHeight / 2)
+        let controlPanelTopY = controlPanelSKSpriteNode.position.y + (controlPanelSKSpriteNode.size.height / 2)
+        let timerCenterY = controlPanelTopY + (mapBottomY - controlPanelTopY) / 2.0
+        timerBackgroundTwo.setScale(1.20)
+        timerBackgroundTwo.position = CGPoint(x: self.size.width / 2, y: timerCenterY)
+
+        // Control panel children positioning for portrait (small screens)
+        // Layout: [Exit] [Country Name] [Skip]
+        exitRedButton.setScale(1.30)
+        exitRedButton.position = CGPoint(x: -110, y: 0.5)
+
+        skipButton.setScale(1.30)
+        skipButton.position = CGPoint(x: 110, y: 0.5)
+
+        countriesNameBackground.setScale(1.10)
+        countriesNameBackground.position = CGPoint(x: 0, y: 0.5)
+
+        // Move labelScores to far right at same height as timer (reparent from controlPanel to self)
+        //labelScores.removeFromParent()
+        labelScores.fontSize = 17
+        labelScores.position = CGPoint(x: self.size.width - 60, y: timerCenterY - 7)
+        labelScores.zPosition = 1
+        self.addChild(labelScores)
+
+        // Cover Hawaii islands — only visible on smallest iPhones (750x1334)
+        // Added as child of mapRectangleGestureMGMT so it zooms/pans with the map
+        let goldenRectLeftEdge = centerX - (mapRectangleGestureMGMT.size.width / 2)
+        let coverWidth = goldenRectLeftEdge
+        // Convert scene-space size to map-node-space by dividing by mapScale (the parent's scale)
+        let hawaiiCover = SKSpriteNode(color: UIColor(red: 0.2588, green: 0.7608, blue: 1, alpha: 1.0), size: CGSize(width: coverWidth / mapScale, height: 55))
+        hawaiiCover.anchorPoint = CGPoint(x: 0, y: 0.5)
+        // Convert scene position to map node's local coordinates
+        let scenePos = CGPoint(x: 0, y: centerY + (30 * mapScale))
+        let localPos = mapRectangleGestureMGMT.convert(scenePos, from: self)
+        hawaiiCover.position = localPos
+        hawaiiCover.zPosition = 2
+        hawaiiCover.name = "hawaiiCover"
+        if mapRectangleGestureMGMT.childNode(withName: "hawaiiCover") == nil {
+            mapRectangleGestureMGMT.addChild(hawaiiCover)
+        }
+    }
 
       @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
           
@@ -653,7 +857,7 @@ class RandomGameScene: SKScene{
                 
                                 
                 if (touchedNode != nil){//This line controls the flow by evaluating if a SKphysics body was touch or not, touchNode will return nil when the screen is touched but no SKphysics body was touched
-                    if (municipioNameLabel.text == touchedNode?.node?.name){//Evaluates touch by matching the label text attribute with node's name attributes
+                    if (countryNameLabel.text == touchedNode?.node?.name){//Evaluates touch by matching the label text attribute with node's name attributes
                         let spritenode = touchedNode?.node as! SKSpriteNode//pass touchedNode node attribute to spritenode, to apply changes
                         //spritenode.physicsBody = nil LINE WAS COMMENTED DUE PHYSICS ARE NEEDED A LONG THE GAME TO CATCH THE WRONG ANSWERED NODES THAT HAVE BEEN ALREADY IDENTIFIED AS IN ANDROID GAME.
                         playCorrectSound()
@@ -666,7 +870,7 @@ class RandomGameScene: SKScene{
                         /**Element identified is removed from names array, Evaluates for game complition and removal of Skip button*/
                         removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval()
                         /**set new municipio to look after*/
-                        setNewMunicipioNameToLookUp()
+                        setNewCountryNameToLookUp()
                         /**add one to number of municipios located*/
                         addToScoreCountWriteToLabel()
                         debugPrint("Inside Physics Correct")
@@ -723,13 +927,13 @@ class RandomGameScene: SKScene{
                     //let touchedNode = self.atPoint(location) // Get the node at the touch location
 
                     // Check if the touched node is an SKSpriteNode and if it matches the municipio name
-                    /*if let spriteNode = touchedNode as? SKSpriteNode, spriteNode.name == municipioNameLabel.text {
+                    /*if let spriteNode = touchedNode as? SKSpriteNode, spriteNode.name == countryNameLabel.text {
                         // Proceed with actions on the spriteNode
                         playCorrectSound()
                         paintNode(spriteNode: spriteNode)
                         setLabelForMunicipioNameAndAddToNode(nodeSprite: spriteNode)
                         removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval()
-                        setNewMunicipioNameToLookUp()
+                        setNewCountryNameToLookUp()
                         addToScoreCountWriteToLabel()
                         return
                     }*/
@@ -741,20 +945,20 @@ class RandomGameScene: SKScene{
                     }*/
                     
 
-                    if let spriteNode = touchedNodes.first(where: { $0.name == municipioNameLabel.text }) as? SKSpriteNode {
+                    if let spriteNode = touchedNodes.first(where: { $0.name == countryNameLabel.text }) as? SKSpriteNode {
                                 //spriteNode.physicsBody = nil // Remove physics if needed
                                 playCorrectSound()
                                 paintNode(spriteNode: spriteNode)
                                 setLabelForMunicipioNameAndAddToNode(nodeSprite: spriteNode)
                                 removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval()
-                                setNewMunicipioNameToLookUp()
+                                setNewCountryNameToLookUp()
                                 addToScoreCountWriteToLabel()
                                 debugPrint("Inside Nodes Correct")
                                 debugPrint("Tapped node: \(spriteNode.name ?? "Unnamed")") // Debug info
                                 return
                             }
                     
-                    if ((touchedNodes.first(where: { $0.name != municipioNameLabel.text }) as? SKSpriteNode) != nil) && (touchedNodes.first(where: { $0.parent == containerNode }) != nil) || ((touchedNodes.first(where: { $0.name == mapRectangleBackground.name })) != nil){
+                    if ((touchedNodes.first(where: { $0.name != countryNameLabel.text }) as? SKSpriteNode) != nil) && (touchedNodes.first(where: { $0.parent == containerNode }) != nil) || ((touchedNodes.first(where: { $0.name == mapRectangleBackground.name })) != nil){
                         debugPrint("end")
                         // Handle incorrect touch
                         playIncorrectSound()
@@ -812,7 +1016,7 @@ class RandomGameScene: SKScene{
               let touchedNode = self.physicsWorld.body(at:touchLocation)//Defines that touch will take effect when it gets in contact with an SKphysics body
               
               if (touchedNode != nil){//This line controls the flow by evaluating if a SKphysics body was touch or not, touchNode will return nil when the screen is touched but no SKphysics body was touched
-                  if (municipioNameLabel.text == touchedNode?.node?.name){//Evaluates touch by matching the label text attribute with node's name attributes
+                  if (countryNameLabel.text == touchedNode?.node?.name){//Evaluates touch by matching the label text attribute with node's name attributes
                       let spritenode = touchedNode?.node as! SKSpriteNode//pass touchedNode node attribute to spritenode, to apply changes
                       spritenode.physicsBody = nil
                       playCorrectSound()
@@ -823,7 +1027,7 @@ class RandomGameScene: SKScene{
                       /**Element identified is removed from names array, Evaluates for game complition and removal of Skip button*/
                       removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval()
                       /**set new municipio to look after*/
-                      setNewMunicipioNameToLookUp()
+                      setNewCountryNameToLookUp()
                       /**add one to number of municipios located*/
                       addToScoreCountWriteToLabel()
                       
@@ -1243,39 +1447,54 @@ class RandomGameScene: SKScene{
           }
       }*/
     
+    /*// OLD PR first random municipio(4 fixed backgrounds + per-name switch) - replaced by getFirstRandomCountryNameToLookUp below
     func getFirstRandomMunicipioNameToLookUp(){
 
-        //setNewMunicipioNameToLookUp()
+        //setNewCountryNameToLookUp()
         // FOR TESTING ONLY - REMOVE AFTER
         //randomIndex = municipios_names_array.firstIndex(of: "Trujillo Alto") ?? 0
          randomIndex = Int.random(in:0...77)
         //randomIndex = Int.random(in:0...77)//gets random index for first municipio name to look up
-        municipioNameLabel.text = municipios_names_array[randomIndex]//first municipio name to look up
+        countryNameLabel.text = municipios_names_array[randomIndex]//first municipio name to look up
         
-        switch(municipioNameLabel.text){
+        switch(countryNameLabel.text){
             case "Aguas Buenas", "Hormigueros", "San Sebastián", "Sabana Grande" :
                 scaleMunicipioNameBackgroundTwoForScreenSizes()
-                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundTwo, children: municipioNameLabel)
+                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundTwo, children: countryNameLabel)
                 addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: municipiosNameBackgroundTwo)
             
             case "Barceloneta", "Canóvanas", "Juana Díaz", "Las Marías", "Las Piedras", "Rio Grande", "San Germán", "San Lorenzo", "Santa Isabel", "Barranquitas", "Quebradillas":
                 scaleMunicipioNameBackgroundFourForScreenSizes()
-                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundFour, children: municipioNameLabel)
+                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundFour, children: countryNameLabel)
                 addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: municipiosNameBackgroundFour)
             
             case  "Cabo Rojo", "Bayamón", "Guayanilla", "Guaynabo", "Guayama", "Humacao", "Mayagüez", "Maunabo", "Naguabo", "Peñuelas", "San Juan", "Vega Alta", "Vega Baja", "Naranjito", "Orocovis", "Trujillo Alto":
                 scaleMunicipioNameBackgroundThreeForScreenSizes()
-                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundThree, children: municipioNameLabel)
+                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundThree, children: countryNameLabel)
                 addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: municipiosNameBackgroundThree)
             
         default:
             
-                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackground, children: municipioNameLabel)
+                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackground, children: countryNameLabel)
                 addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: municipiosNameBackground)
             break
         }
         
         
+    }
+    */
+
+    /**Picks the first random country name to look up, adds the label/background to the control panel and sizes the background to fit the name.
+     Called from didMove after the device function, so countriesNameBGScale is already set when resizeCountryNameBackground() runs*/
+    func getFirstRandomCountryNameToLookUp(){
+        // FOR TESTING ONLY - REMOVE AFTER
+        //randomIndex = countries_names_array.firstIndex(of: "Dominican Republic") ?? 0
+        randomIndex = Int.random(in:0...countries_names_array.count - 1)//gets random index for first country name to look up
+        countryNameLabel.fontSize = 20 // Reset to default before measuring
+        countryNameLabel.text = countries_names_array[randomIndex]//first country name to look up
+        addChildSKLabelNodeToParentSKSpriteNode(parent: countriesNameBackground, children: countryNameLabel)
+        addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: countriesNameBackground)
+        resizeCountryNameBackground()
     }
     
     func addChildSKNodeToParentself(children:SKNode){
@@ -1512,7 +1731,7 @@ class RandomGameScene: SKScene{
         
         
         if (touchedNode != nil){//This line controls the flow by evaluating if a SKphysics body was touch or not, touchNode will return nil when the screen is touched but no SKphysics body was touched
-            if (municipioNameLabel.text == touchedNode?.node?.name){//Evaluates touch by matching the label text attribute with node's name attributes
+            if (countryNameLabel.text == touchedNode?.node?.name){//Evaluates touch by matching the label text attribute with node's name attributes
                 let spritenode = touchedNode?.node as! SKSpriteNode//pass touchedNode node attribute to spritenode, to apply changes
                 paintNode(spriteNode: spritenode)//color SKSpriteNode green
                 playCorrectSound()
@@ -1521,7 +1740,7 @@ class RandomGameScene: SKScene{
                 /**Element identified is removed from names array, Evaluates for game complition and removal of Skip button*/
                 removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval()
                 /**set new municipio to look after*/
-                setNewMunicipioNameToLookUp()
+                setNewCountryNameToLookUp()
                 /**add one to number of municipios located*/
                 addToScoreCountWriteToLabel()
                 
@@ -1565,11 +1784,11 @@ class RandomGameScene: SKScene{
           let locationNameLabel = SKLabelNode()/**Label serves two uses, first it's the display label on map for short named municipios but also is use to pass its text Attributes to function splitTextIntoFields*/
           let firstLineLabel = SKLabelNode()//First label for long named municipio names(ex. Aguas Buenas)
           let secondLineLabel = SKLabelNode()//Second label for long named municipio names(ex Aguas Buenas)
-          locationNameLabel.text = municipioNameLabel.text//Text atribute is pass to locationNameLabel to be used by one word municipios(except for Las Piedras and Las Marias) same
+          locationNameLabel.text = countryNameLabel.text//Text atribute is pass to locationNameLabel to be used by one word municipios(except for Las Piedras and Las Marias) same
           
           /**The switch statement allows to set the label(that identifies each municipio in the map) with attributes necessary to acamodate text, set positioning and other attributes  exclusive to a group of nodes or individual nodes  */
-          /**The execution will enter the case that corresponds with the String value of municipioNameLabel.text*/
-          switch municipioNameLabel.text {
+          /**The execution will enter the case that corresponds with the String value of countryNameLabel.text*/
+          switch countryNameLabel.text {
               
           case "Maricao", "Moca", "Arecibo", "Coamo", "Yabucoa" :
              setOneLineMunicipioNameLabel(Oneline:locationNameLabel)//Attributes are set for label
@@ -2211,7 +2430,7 @@ class RandomGameScene: SKScene{
     
     //sets attributes for label to use with one word municipio names
     func setOneLineMunicipioNameLabel(Oneline:SKLabelNode){
-        //Oneline.text = municipioNameLabel.text
+        //Oneline.text = countryNameLabel.text
         Oneline.fontName = "ArialMT"//"Helvetica"
         Oneline.fontColor = UIColor.init(red: 0.149, green: 0.149, blue: 0.149, alpha: 1.0)
         //Oneline.xScale = -1.0
@@ -2234,7 +2453,7 @@ class RandomGameScene: SKScene{
     }
     
     func removeIdentifiedElementEvaluateCompleteGameAndSkipButtonRemoval(){
-        let countOfIndexes = municipios_names_array.count - 1//Gets the number of indexes in array
+        let countOfIndexes = countries_names_array.count - 1//Gets the number of indexes in array
         
         //If condition is true means that two elemens are left in array, it removes skipButton due second to last(penultimo elemento) element is about to be removed next
         if countOfIndexes == 1  {
@@ -2244,7 +2463,7 @@ class RandomGameScene: SKScene{
 
         //removes element while more than 1 element are left in array
         if countOfIndexes > 0 {
-            municipios_names_array.remove(at:randomIndex)//removes element identified that is at index(remember taht this variable updates in the following block))
+            countries_names_array.remove(at:randomIndex)//removes element identified that is at index(remember taht this variable updates in the following block))
             
         }
         
@@ -2270,6 +2489,7 @@ class RandomGameScene: SKScene{
     }
     
     
+    /*// OLD PR random municipio name box(4 fixed backgrounds + per-name switch + per-device scaling) - replaced by dynamic countriesNameBackground below, copied from AlphabeticGameScene
     func setNewMunicipioNameToLookUp(){
         let countOfIndexes = municipios_names_array.count - 1
         //debugPrint(countOfIndexes)
@@ -2279,34 +2499,34 @@ class RandomGameScene: SKScene{
             repeat{
                 randomIndex = Int.random(in:0...countOfIndexes)
             }
-            while municipioNameLabel.text == municipios_names_array[randomIndex] && countOfIndexes != 0
+            while countryNameLabel.text == municipios_names_array[randomIndex] && countOfIndexes != 0
         }
         
         else{
             randomIndex = Int.random(in:0...countOfIndexes)
         }
         
-        municipioNameLabel.text = municipios_names_array [randomIndex] //Writes to label the next municipio name to be located by player
+        countryNameLabel.text = municipios_names_array [randomIndex] //Writes to label the next municipio name to be located by player
        //Switch reveals the name of the next municipio to look out for
-        switch(municipioNameLabel.text){
+        switch(countryNameLabel.text){
             //This block manage the longest two word names
             case "Aguas Buenas", "Hormigueros", "San Sebastián", "Sabana Grande" ://This municipio names will use municipiosNameBackgroundTwo
                 //Removes current background to add municipiosNameBackgroundTwo to the scene if its not already present on the scene
                 if municipiosNameBackgroundTwo.parent == nil{// Checks if municipiosNameBackgroundTwo is already in the scene, if municipioNameBackgroundTwo is already on the scene the following block is ignored
-                    switch(municipioNameLabel.parent?.name){//returns the background currently in use that is not municipiosNameBackgroundTwo and that needs to be removed in order to add municipiosNameBackgroundTwo to fit "Aguas Buenas", "Hormigueros", "San Sebastián", "Sabana Grande"
+                    switch(countryNameLabel.parent?.name){//returns the background currently in use that is not municipiosNameBackgroundTwo and that needs to be removed in order to add municipiosNameBackgroundTwo to fit "Aguas Buenas", "Hormigueros", "San Sebastián", "Sabana Grande"
                         
                         case "MunicipiosNameBackground"://Background to be removed in order for municipiosNameBackgroundTwo to be added
-                            municipioNameLabel.removeFromParent()//municipioNameLabel is removed in order to be added(as child) to municipiosNameBackgroundTwo
+                            countryNameLabel.removeFromParent()//countryNameLabel is removed in order to be added(as child) to municipiosNameBackgroundTwo
                             municipiosNameBackground.removeFromParent()//If municipiosNameBackground.parent != nil true municipiosNameBackgroundis removed to put in its place municipiosNameBackgroundTwo
                             scaleMunicipioNameBackgroundTwoForScreenSizes()//scaling for municipiosNameBackgroundTwo is set according to screen size
                         
                         case "MunicipiosNameBackgroundThree":
-                            municipioNameLabel.removeFromParent()
+                            countryNameLabel.removeFromParent()
                             municipiosNameBackgroundThree.removeFromParent()
                             scaleMunicipioNameBackgroundTwoForScreenSizes()
                             
                         case "MunicipiosNameBackgroundFour":
-                            municipioNameLabel.removeFromParent()
+                            countryNameLabel.removeFromParent()
                             municipiosNameBackgroundFour.removeFromParent()
                             scaleMunicipioNameBackgroundTwoForScreenSizes()
                             
@@ -2316,51 +2536,51 @@ class RandomGameScene: SKScene{
                         break
                         
                     }
-                    addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundTwo, children: municipioNameLabel)
+                    addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundTwo, children: countryNameLabel)
                     addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: municipiosNameBackgroundTwo)
                 }
         
             //Block manages short two words municipio names and longer one word names(CHECK COMMENTS ON FIRST BLOCK OF THE SWITCH CASE AS THEY FOLLOW THE SAME LOGIC)
         case "Barceloneta", "Canóvanas", "Juana Díaz", "Las Marías", "Las Piedras", "Rio Grande", "San Germán", "San Lorenzo", "Santa Isabel", "Barranquitas", "Quebradillas"://This municipio names will use municipiosNameBackgroundFour
             if municipiosNameBackgroundFour.parent == nil{
-                switch(municipioNameLabel.parent?.name){
+                switch(countryNameLabel.parent?.name){
                     case "MunicipiosNameBackground":
-                        municipioNameLabel.removeFromParent()
+                        countryNameLabel.removeFromParent()
                         municipiosNameBackground.removeFromParent()
                         scaleMunicipioNameBackgroundFourForScreenSizes()
                     
                     case "MunicipiosNameBackgroundTwo":
-                        municipioNameLabel.removeFromParent()
+                        countryNameLabel.removeFromParent()
                         municipiosNameBackgroundTwo.removeFromParent()
                         scaleMunicipioNameBackgroundFourForScreenSizes()
                     
                     case "MunicipiosNameBackgroundThree":
-                        municipioNameLabel.removeFromParent()
+                        countryNameLabel.removeFromParent()
                         municipiosNameBackgroundThree.removeFromParent()
                         scaleMunicipioNameBackgroundFourForScreenSizes()
                     
                     default:
                     break
             }
-                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundFour, children: municipioNameLabel)
+                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundFour, children: countryNameLabel)
                 addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: municipiosNameBackgroundFour)
         }
             //Block manages long single words and short two words municipio names(CHECK COMMENTS ON FIRST BLOCK OF THE SWITCH CASE AS THEY FOLLOW THE SAME LOGIC)
         case  "Cabo Rojo", "Bayamón", "Guayanilla", "Guaynabo", "Guayama", "Humacao", "Mayagüez", "Maunabo", "Naguabo", "Peñuelas", "San Juan", "Vega Alta", "Vega Baja", "Naranjito", "Orocovis", "Trujillo Alto"://This municipio names will use municipiosNameBackgroundThree
             if municipiosNameBackgroundThree.parent == nil{
-                switch(municipioNameLabel.parent?.name){
+                switch(countryNameLabel.parent?.name){
                     case "MunicipiosNameBackground":
-                        municipioNameLabel.removeFromParent()
+                        countryNameLabel.removeFromParent()
                         municipiosNameBackground.removeFromParent()
                         scaleMunicipioNameBackgroundThreeForScreenSizes()
                         
                     case "MunicipiosNameBackgroundTwo":
-                        municipioNameLabel.removeFromParent()
+                        countryNameLabel.removeFromParent()
                         municipiosNameBackgroundTwo.removeFromParent()
                         scaleMunicipioNameBackgroundThreeForScreenSizes()
                         
                     case "MunicipiosNameBackgroundFour":
-                        municipioNameLabel.removeFromParent()
+                        countryNameLabel.removeFromParent()
                         municipiosNameBackgroundFour.removeFromParent()
                         scaleMunicipioNameBackgroundThreeForScreenSizes()
                         
@@ -2368,24 +2588,24 @@ class RandomGameScene: SKScene{
                         break
                 }
                 
-                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundThree, children: municipioNameLabel)
+                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundThree, children: countryNameLabel)
                 addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: municipiosNameBackgroundThree)
             }
             
             //Following block receive most municipio names(shorter ones)This municipio names will use municipiosNameBackground (CHECK COMMENTS ON FIRST BLOCK OF THE SWITCH CASE AS THEY FOLLOW THE SAME LOGIC)
           default:
             if municipiosNameBackground.parent == nil{
-                switch(municipioNameLabel.parent?.name){
+                switch(countryNameLabel.parent?.name){
                     case "MunicipiosNameBackgroundTwo":
-                        municipioNameLabel.removeFromParent()
+                        countryNameLabel.removeFromParent()
                         municipiosNameBackgroundTwo.removeFromParent()
                     
                     case "MunicipiosNameBackgroundThree":
-                        municipioNameLabel.removeFromParent()
+                        countryNameLabel.removeFromParent()
                         municipiosNameBackgroundThree.removeFromParent()
                     
                     case "MunicipiosNameBackgroundFour":
-                        municipioNameLabel.removeFromParent()
+                        countryNameLabel.removeFromParent()
                         municipiosNameBackgroundFour.removeFromParent()
                     
                     default:
@@ -2393,21 +2613,21 @@ class RandomGameScene: SKScene{
                     break
                     
                 }
-                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackground, children: municipioNameLabel)
+                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackground, children: countryNameLabel)
                 addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: municipiosNameBackground)
             }
            
             break
         }
         
-        /*municipioNameLabel.text = municipios_names_array[randomIndex]//Se desplega el nuevo municipio a ser localizado por el jugador
-        if municipioNameLabel.text == "Aguas Buenas" || municipioNameLabel.text == "Barceloneta" || municipioNameLabel.text == "Barranquitas" || municipioNameLabel.text == "Cabo Rojo"
-        || municipioNameLabel.text == "Canóvanas" || municipioNameLabel.text == "Guayanilla" || municipioNameLabel.text == "Guaynabo" || municipioNameLabel.text == "Hormigueros"
-        || municipioNameLabel.text == "Juana Díaz" || municipioNameLabel.text == "Las Marías" || municipioNameLabel.text == "Las Piedras" || municipioNameLabel.text == "Mayagüez"
-        || municipioNameLabel.text == "Quebradillas" || municipioNameLabel.text == "Rio Grande" || municipioNameLabel.text == "Sabana Grande" || municipioNameLabel.text == "San Germán"
-        || municipioNameLabel.text == "San Lorenzo" || municipioNameLabel.text == "San Sebastián" || municipioNameLabel.text == "Santa Isabel" || municipioNameLabel.text == "Trujillo Alto"{
+        /*countryNameLabel.text = municipios_names_array[randomIndex]//Se desplega el nuevo municipio a ser localizado por el jugador
+        if countryNameLabel.text == "Aguas Buenas" || countryNameLabel.text == "Barceloneta" || countryNameLabel.text == "Barranquitas" || countryNameLabel.text == "Cabo Rojo"
+        || countryNameLabel.text == "Canóvanas" || countryNameLabel.text == "Guayanilla" || countryNameLabel.text == "Guaynabo" || countryNameLabel.text == "Hormigueros"
+        || countryNameLabel.text == "Juana Díaz" || countryNameLabel.text == "Las Marías" || countryNameLabel.text == "Las Piedras" || countryNameLabel.text == "Mayagüez"
+        || countryNameLabel.text == "Quebradillas" || countryNameLabel.text == "Rio Grande" || countryNameLabel.text == "Sabana Grande" || countryNameLabel.text == "San Germán"
+        || countryNameLabel.text == "San Lorenzo" || countryNameLabel.text == "San Sebastián" || countryNameLabel.text == "Santa Isabel" || countryNameLabel.text == "Trujillo Alto"{
             if municipiosNameBackgroundTwo.parent == nil{
-                municipioNameLabel.removeFromParent()
+                countryNameLabel.removeFromParent()
                 municipiosNameBackground.removeFromParent()
                 
                 if screenSize.width == 2048.0 && screenSize.height == 2732.0{
@@ -2420,22 +2640,22 @@ class RandomGameScene: SKScene{
                 else{
                     municipiosNameBackgroundTwo.setScale(1.20)
                 }
-                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundTwo, children: municipioNameLabel)
+                addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundTwo, children: countryNameLabel)
                 addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: municipiosNameBackgroundTwo)
             }
             /*if municipiosNameBackgroundTwo.parent == nil{
-            municipioNameLabel.removeFromParent()
+            countryNameLabel.removeFromParent()
             municipiosNameBackground.removeFromParent()
-            addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundTwo, children: municipioNameLabel)
+            addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackgroundTwo, children: countryNameLabel)
             addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: municipiosNameBackgroundTwo)
             }*/
             //if else municipiosNameBackgroundTwo.parent
         }
         else {
             if municipiosNameBackground.parent == nil{
-            municipioNameLabel.removeFromParent()
+            countryNameLabel.removeFromParent()
             municipiosNameBackgroundTwo.removeFromParent()
-            addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackground, children: municipioNameLabel)
+            addChildSKLabelNodeToParentSKSpriteNode(parent: municipiosNameBackground, children: countryNameLabel)
             addChildSKSpriteNodeToParentSKSpriteNode(parent: controlPanelSKSpriteNode, children: municipiosNameBackground)
             }
         }*/
@@ -2482,6 +2702,70 @@ class RandomGameScene: SKScene{
             municipiosNameBackgroundFour.setScale(1.35)
         }
     }
+    */
+
+    /**following function picks the next random country name to look up and adjusts the background size for the label(countryNameLabel) */
+    func setNewCountryNameToLookUp(){
+        let countOfIndexes = countries_names_array.count - 1
+        //loop keeps next skipped country name from repeating, meaning any time you press skip it will return a different country, and not the same one.
+        if pressSKipButton == true{
+            repeat{
+                randomIndex = Int.random(in:0...countOfIndexes)
+            }
+            while countryNameLabel.text == countries_names_array[randomIndex] && countOfIndexes != 0
+        }
+        else{
+            randomIndex = Int.random(in:0...countOfIndexes)
+        }
+        countryNameLabel.fontSize = 20 // Reset to default before measuring
+        countryNameLabel.text = countries_names_array [randomIndex] //Writes to label the next country name to be located by player
+        resizeCountryNameBackground()
+    }
+
+    /// Dynamically resizes countriesNameBackground to fit the current countryNameLabel text with rounded corners and border.
+    /// Auto-shrinks the font if the name is too long to fit between the Salir/Saltar buttons.
+    func resizeCountryNameBackground(){
+        // Reset scale before measuring so frame calculations are accurate
+        countriesNameBackground.setScale(1.0)
+        //let isIPad = countriesNameBGScale > 1.10
+        let isIPad = UIDevice.current.userInterfaceIdiom == .pad//device check instead of inferring from countriesNameBGScale(same idiom check used by didMove, handlePan and handlePinchFrom)
+        let horizontalPadding: CGFloat = 36.0
+        let bgHeight: CGFloat = isIPad ? 20.0 * (countriesNameBGScale / 1.10) : 30.0
+        let bgScale: CGFloat = 1.10
+        // iPhone buttons at ±110, iPad buttons at ±230 — different max widths
+        let maxVisualWidth: CGFloat = isIPad ? 139.0 * (countriesNameBGScale / 1.10) * 1.4 : 139.0
+        let maxUnscaledWidth: CGFloat = maxVisualWidth / bgScale
+        let minFontSize: CGFloat = 12.0
+
+        // Shrink font if text + padding exceeds max width
+        let defaultFontSize: CGFloat = 20.0
+        var textWidth = countryNameLabel.frame.size.width
+        while textWidth + horizontalPadding > maxUnscaledWidth && countryNameLabel.fontSize > minFontSize {
+            countryNameLabel.fontSize -= 1
+            textWidth = countryNameLabel.frame.size.width
+        }
+
+        // Adjust label y position — smaller fonts need a slight upward nudge to stay centered
+        let fontShrinkAmount = defaultFontSize - countryNameLabel.fontSize
+        countryNameLabel.position.y = -7.5 + (fontShrinkAmount * 0.15)
+
+        let newWidth = min(textWidth + horizontalPadding, maxUnscaledWidth)
+
+        let roundedPath = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: newWidth, height: bgHeight), cornerRadius: bgHeight / 2.0)
+        let shapeNode = SKShapeNode(path: roundedPath.cgPath)
+        shapeNode.fillColor = UIColor(red: 0.2392, green: 0.698, blue: 1, alpha: 1.0)
+        shapeNode.strokeColor = UIColor(red: 0.6471, green: 0.8431, blue: 0.9098, alpha: 1.0)
+        shapeNode.lineWidth = 4.0
+
+        //let textureView = SKView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
+        //Reuse the scene's own SKView to render the texture, a throwaway SKView is only created as fallback if the scene has no view yet
+        let textureView = self.view ?? SKView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
+        if let texture = textureView.texture(from: shapeNode) {
+            countriesNameBackground.texture = texture
+            countriesNameBackground.size = texture.size()
+            countriesNameBackground.setScale(countriesNameBGScale)
+        }
+    }
     
     //function updates the label rendering the number of municipios identified already at the bottom right of screen
     func addToScoreCountWriteToLabel(){
@@ -2493,7 +2777,7 @@ class RandomGameScene: SKScene{
         //skipButton.alpha = 0.9//efecto para skipButton al presionarlo, esta linea es solo una prueba y debo al menos sujetarlo a una condicion en el futuro como un if
         //skipButtonPressed = true
         pressSKipButton = true
-        setNewMunicipioNameToLookUp()
+        setNewCountryNameToLookUp()
         //debugPrint("Skip Button touched")
     }
     
